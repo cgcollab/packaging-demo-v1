@@ -1,1 +1,1 @@
-# gitops-full-profile
+# gitops-config
