@@ -1,0 +1,21 @@
+#@data/values
+
+#! This file contains default config values
+#! To override these values, use override files
+---
+namespace:
+  name: carvel-demo
+  #! Set to null to omit Namespace resource
+  owner: null
+
+helloApp:
+  name: hello-app
+  message: stranger
+
+  ingress:
+    hostname: null
+    domain: null
+    class: null
+    secret:
+      certificate: null
+      privateKey: null
