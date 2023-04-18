@@ -1,8 +1,8 @@
 namespace:
   name: coworking-space
   #! Set to null to omit Namespace resource
-  owner: true
+  owner: null
 
 helloApp:
-  name: hello-coworkers
-  message: colleagues
+  name: hello-partners
+  message: partners

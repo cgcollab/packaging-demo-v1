@@ -10,7 +10,7 @@ namespace:
 
 helloApp:
   name: hello-app
-  message: stranger
+  message: "large stranger"
 
   ingress:
     hostname: null
