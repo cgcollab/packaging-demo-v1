@@ -4,18 +4,18 @@
 #! To override these values, use override files
 ---
 namespace:
-  name: carvel-demo
+  name: hello-redis-lg
   #! Set to null to omit Namespace resource
-  owner: null
+  owner: true
 
 helloApp:
   name: hello-app
-  message: "large stranger"
+  message: "default large"
 
   ingress:
-    hostname: null
-    domain: null
-    class: null
+    hostname: my-hostname
+    domain: domain.com
+    class: contour
     secret:
-      certificate: null
-      privateKey: null
+      certificate: this-is-a-CA
+      privateKey: this-is-private-key
