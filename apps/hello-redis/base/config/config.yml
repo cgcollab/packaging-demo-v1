@@ -38,3 +38,10 @@ spec:
               value: #@ data.values.helloApp.message
             - name: REDIS_ADDRESS
               value: #@ data.values.helloApp.name + "-redis-leader." + data.values.namespace.name + ".svc.cluster.local:6379"
+          resources:
+            requests:
+              memory: #@ data.values.helloApp.memRequest
+              cpu: #@ data.values.helloApp.cpuRequest
+            limits:
+              memory: #@ data.values.helloApp.memLimit
+              cpu: #@ data.values.helloApp.cpuLimit

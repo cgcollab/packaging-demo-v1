@@ -12,6 +12,11 @@ helloApp:
   name: hello-app
   message: "default large"
 
+  memRequest: "64Mi"
+  cpuRequest: "250m"
+  memLimit: "128Mi"
+  cpuLimit: "500m"
+
   ingress:
     hostname: my-hostname
     domain: domain.com
