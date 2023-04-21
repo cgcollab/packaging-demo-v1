@@ -3,11 +3,11 @@ kind: Config
 #! build image
 sources:
 - image: localhost:5001/hello-app
-  path: temp/src
+  path: temp/src/giant-app
   pack:
     build:
       builder: paketobuildpacks/builder
 #! publish (push) image
 destinations:
-- image: localhost:5001/hello-app
-  newImage: localhost:5001/hello-app
+- image: localhost:5001/giant-app
+  newImage: localhost:5001/giant-app

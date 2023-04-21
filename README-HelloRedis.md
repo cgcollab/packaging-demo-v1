@@ -22,10 +22,13 @@ export DEPLOYMENT_HOME=deployments
 export DEPLOYMENT=ny
 export APP_HOME=apps
 export PROFILE_HOME=profiles
-export APP_NAME=hello-redis
-export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/hello-redis.git
+export APP_NAME=hello-app
+export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
 rm -rf temp
 mkdir -p temp/generated
+rm -rf $APP_HOME/$APP_NAME/base/config/temp
+rm $APP_HOME/$APP_NAME/base/*lock*
+rm $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
 ```
 
 Downloading and incorporating application's dependencies
@@ -37,8 +40,8 @@ Clone the application and build it so that we can seal the images SHA
 in the images file:  $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
 we are discarding the output as it's not resolved by ytt
 ```shell
-rm -rf temp/src 
-git clone $APP_REPO temp/src 
+rm -rf temp/src/$APP_NAME
+git clone $APP_REPO temp/src/$APP_NAME
 kbld -f $APP_HOME/$APP_NAME/base/kbld.yml \
     -f $APP_HOME/$APP_NAME/base/config \
     --imgpkg-lock-output $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
@@ -60,12 +63,12 @@ ytt -f $APP_HOME/$APP_NAME/base/config \
 Bundles FLOW 1 - Centralized approach
 ```shell
 clear
-imgpkg push -i $MY_REG/$PROFILE-$DEPLOYMENT-hello-app-config:v1.0.0 \
+imgpkg push -i $MY_REG/$PROFILE-$DEPLOYMENT-$APP_NAME-config:v1.0.0 \
         -f temp/generated/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml
-imgpkg pull -i $MY_REG/$PROFILE-$DEPLOYMENT-hello-app-config:v1.0.0 \
-            -o temp/$PROFILE-$DEPLOYMENT-hello-app-config        
+imgpkg pull -i $MY_REG/$PROFILE-$DEPLOYMENT-$APP_NAME-config:v1.0.0 \
+            -o temp/$PROFILE-$DEPLOYMENT-$APP_NAME-config        
         
-curl $MY_REG/v2/hello-app-bundle/tags/list |jq
+curl $MY_REG/v2/$PROFILE-$DEPLOYMENT-$APP_NAME-config/tags/list |jq
 ```
 
 
@@ -74,10 +77,11 @@ Bundles FLOW 2 - Decentralized approach
 ```shell
 clear
 
-imgpkg push -b $MY_REG/$PROFILE-hello-app-bundle:v1.0.0 \
+imgpkg push -b $MY_REG/$PROFILE-$APP_NAME-bundle:v1.0.0 \
             -f $APP_HOME/$APP_NAME/base/config \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
             --lock-output $APP_HOME/$APP_NAME/base/bundle.lock.yml
-imgpkg pull -b $MY_REG/$PROFILE-hello-app-bundle:v1.0.0 \
-            -o temp/$PROFILE-hello-app-bundle
+imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:v1.0.0 \
+            -o temp/$PROFILE-$APP_NAME-bundle
+curl $MY_REG/v2/$PROFILE-$APP_NAME-bundle/tags/list |jq
 ```
