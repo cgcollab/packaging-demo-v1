@@ -41,7 +41,7 @@ rm -rf temp/src
 git clone $APP_REPO temp/src 
 kbld -f $APP_HOME/$APP_NAME/base/kbld.yml \
     -f $APP_HOME/$APP_NAME/base/config \
-    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
+    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
     > /dev/null
 ```
 
@@ -53,51 +53,31 @@ echo  $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME
 ytt -f $APP_HOME/$APP_NAME/base/config \
     -f $PROFILE_HOME/$PROFILE/$APP_NAME \
     -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
-    -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
+    -f $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
     | kbld -f- > temp/generated/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml
 ```
 
-Bundles --->>> Is this relly what we want to package????
+Bundles FLOW 1 - Centralized approach
 ```shell
 clear
-cp -r $APP_HOME/$APP_NAME/base/.imgpkg temp/generated/
-imgpkg push -b $MY_REG/hello-app-bundle:v1.0.0 \
-            -f temp/generated \
-            --lock-output $APP_HOME/$APP_NAME/base/bundle.lock.yml
-            
+imgpkg push -i $MY_REG/$PROFILE-$DEPLOYMENT-hello-app-config:v1.0.0 \
+        -f temp/generated/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml
+imgpkg pull -i $MY_REG/$PROFILE-$DEPLOYMENT-hello-app-config:v1.0.0 \
+            -o temp/$PROFILE-$DEPLOYMENT-hello-app-config        
+        
 curl $MY_REG/v2/hello-app-bundle/tags/list |jq
-
-imgpkg pull -b $MY_REG/hello-app-bundle:v1.0.0 \
-            -o temp/hello-app-bundle
 ```
 
 
-
---------------FLOW2??
+Bundles FLOW 2 - Decentralized approach 
+- I can resolve at the edge specific config
 ```shell
-ytt -f $APP_HOME/$APP_NAME/base/config \
-    -f $PROFILE_HOME/$PROFILE/$APP_NAME > temp/generated/$APP_NAME-UNRESOLVED-generated.yml
-```
+clear
 
-If need to regenerate yaml with resolved SHA images
-```shell
-ytt -f $APP_HOME/$APP_NAME/base/config \
-    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
-    -f $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
-    | kbld -f-
-    
-```
-
-
-Bundles --->>> Is this relly what we want to package????
-```shell
-imgpkg push -b $MY_REG/hello-app-bundle:v1.0.0 \
-            -f $APP_HOME/$APP_NAME/base \
+imgpkg push -b $MY_REG/$PROFILE-hello-app-bundle:v1.0.0 \
+            -f $APP_HOME/$APP_NAME/base/config \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
             --lock-output $APP_HOME/$APP_NAME/base/bundle.lock.yml
-            
-curl $MY_REG/v2/hello-app-bundle/tags/list |jq
-
-imgpkg pull -b $MY_REG/hello-app-bundle:v1.0.0 \
-            -o temp/hello-app-bundle
+imgpkg pull -b $MY_REG/$PROFILE-hello-app-bundle:v1.0.0 \
+            -o temp/$PROFILE-hello-app-bundle
 ```
