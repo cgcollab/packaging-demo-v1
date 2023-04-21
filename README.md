@@ -37,11 +37,10 @@ Clone the application and build it so that we can seal the images SHA
 in the images file:  $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
 we are discarding the output as it's not resolved by ytt
 ```shell
-cat $APP_HOME/$APP_NAME/base/kbld.yml
-cat $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 rm -rf temp/src 
 git clone $APP_REPO temp/src 
 kbld -f $APP_HOME/$APP_NAME/base/kbld.yml \
+    -f $APP_HOME/$APP_NAME/base/config \
     --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
     > /dev/null
 ```
@@ -61,8 +60,9 @@ ytt -f $APP_HOME/$APP_NAME/base/config \
 Bundles --->>> Is this relly what we want to package????
 ```shell
 clear
+cp -r $APP_HOME/$APP_NAME/base/.imgpkg temp/generated/
 imgpkg push -b $MY_REG/hello-app-bundle:v1.0.0 \
-            -f temp/generated/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml \
+            -f temp/generated \
             --lock-output $APP_HOME/$APP_NAME/base/bundle.lock.yml
             
 curl $MY_REG/v2/hello-app-bundle/tags/list |jq
