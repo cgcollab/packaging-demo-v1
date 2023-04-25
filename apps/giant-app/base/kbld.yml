@@ -2,7 +2,7 @@ apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
 #! build image
 sources:
-- image: localhost:5001/hello-app
+- image: localhost:5001/giant-app
   path: temp/src/giant-app
   pack:
     build:
