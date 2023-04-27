@@ -1,0 +1,6 @@
+---
+apiVersion: imgpkg.carvel.dev/v1alpha1
+bundle:
+  image: localhost:5001/lg-hello-app@sha256:9d66391dab2316541d7174051af6abbd61e1a9345efd584d6d27253549df70ba
+  tag: v1.0.0
+kind: BundleLock

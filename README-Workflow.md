@@ -27,16 +27,16 @@ export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME
 rm -rf temp
 mkdir -p temp/intermediate
 rm -rf $APP_HOME/$APP_NAME/base/config/temp
-rm $APP_HOME/$APP_NAME/base/*lock*
-rm $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
+rm $APP_HOME/$APP_NAME/*lock*
+rm $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 rm -rf deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config/
 ```
 
 Downloading and incorporating application's dependencies
 ``` shell
-if [ -f $APP_HOME/$APP_NAME/base/vendir.yml ] 
+if [ -f $APP_HOME/$APP_NAME/vendir.yml ] 
 then
-    vendir sync --chdir $APP_HOME/$APP_NAME/base
+    vendir sync --chdir $APP_HOME/$APP_NAME
 fi
 ```
 
@@ -45,12 +45,7 @@ in the images file:  $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
 we are discarding the output as it's not resolved by ytt
 ```shell
 rm -rf temp/src/$APP_NAME
-mkdir -p $APP_HOME/$APP_NAME/base/config/.imgpkg
 git clone $APP_REPO temp/src/$APP_NAME
-kbld -f $APP_HOME/$APP_NAME/base/kbld.yml \
-    -f $APP_HOME/$APP_NAME/base/config \
-    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
-    > /dev/null
 ```
 
 Bundles FLOW 1 - Centralized approach
@@ -58,6 +53,12 @@ At this point we can generate the resolved yaml per each location using
 the previously resolved images SHA
 ```shell
 clear
+kbld -f $APP_HOME/$APP_NAME/kbld.yml \
+    -f $APP_HOME/$APP_NAME/base/config \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
+    > /dev/null
 echo  $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME
 ytt -f $APP_HOME/$APP_NAME/base/config \
     -f $PROFILE_HOME/$PROFILE/$APP_NAME \
@@ -73,6 +74,12 @@ imgpkg pull -i $MY_REG/$PROFILE-$DEPLOYMENT-$APP_NAME-config:v1.0.0 \
         
 curl $MY_REG/v2/$PROFILE-$DEPLOYMENT-$APP_NAME-config/tags/list |jq
 ```
+We need to apply the deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config/.yaml 
+to teh k8s cluster
+```shell
+kapp deploy -a $APP_NAME -f deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config
+```
+
 ======================
 
 Bundles FLOW 2 - Decentralized approach 
@@ -80,22 +87,32 @@ Bundles FLOW 2 - Decentralized approach
 - first we package
 ```shell
 clear
-
+kbld -f $APP_HOME/$APP_NAME/kbld.yml \
+    -f $APP_HOME/$APP_NAME/base/config \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
+    > /dev/null
 imgpkg push -b $MY_REG/$PROFILE-$APP_NAME-bundle:v1.0.0 \
-            -f $APP_HOME/$APP_NAME/base/config \
+            -f $APP_HOME/$APP_NAME/base \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
-            --lock-output $APP_HOME/$APP_NAME/base/bundle.lock.yml
-curl $MY_REG/v2/$PROFILE-$APP_NAME-bundle/tags/list |jq
+            --lock-output $APP_HOME/$APP_NAME/bundle.lock.yml
+curl $MY_REG/v2/$PROFILE-$APP_NAME/tags/list |jq
 ```
 - then at the final location
 - we get the image and apply the location specific config (deployment folder) that can be located anywhere
 - (consider airgapped -> imgpkg copy/pull)
 ```shell
 imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:v1.0.0 \
-            -o temp/imgpkg/$PROFILE-$APP_NAME-bundle
+            -o temp/$PROFILE-$APP_NAME/bundle/config
             
-ytt -f temp/imgpkg/$PROFILE-$APP_NAME-bundle \
-    -f temp/imgpkg/$PROFILE-$APP_NAME-bundle/.imgpkg/images.yml \
+ytt -f temp/$PROFILE-$APP_NAME/bundle/config \
+    -f temp/$PROFILE-$APP_NAME/bundle/config/.imgpkg/images.yml \
     -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
-    | kbld -f- > deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config/$PROFILE-$DEPLOYMENT-$APP_NAME-Flow2.yaml
+    | kbld -f- > deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
+```
+SKIP to Packaging
+Now we resolve and then deploy
+```shell
+
+kapp deploy -a $APP_NAME -f deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
 ```
