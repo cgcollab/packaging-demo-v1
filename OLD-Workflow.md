@@ -24,15 +24,12 @@ export APP_HOME=apps
 export PROFILE_HOME=profiles
 export APP_NAME=hello-app
 export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
-export VERSION="1.0.0"
 rm -rf temp
 mkdir -p temp/intermediate
 rm -rf $APP_HOME/$APP_NAME/base/config/temp
 rm $APP_HOME/$APP_NAME/*lock*
 rm $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
-rm packages/lg/$APP_NAME/.imgpkg/images.yml
-rm packages/lg/$APP_NAME/schema-openapi.yml
-rm pkg-repos/$PROFILE/.imgpkg/images.yml
+rm -rf deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config/
 ```
 
 Downloading and incorporating application's dependencies
@@ -50,6 +47,41 @@ we are discarding the output as it's not resolved by ytt
 rm -rf temp/src/$APP_NAME
 git clone $APP_REPO temp/src/$APP_NAME
 ```
+
+Bundles FLOW 1 - Centralized approach
+At this point we can generate the resolved yaml per each location using
+the previously resolved images SHA
+```shell
+clear
+kbld -f $APP_HOME/$APP_NAME/kbld.yml \
+    -f $APP_HOME/$APP_NAME/base/config \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    --imgpkg-lock-output $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
+    > /dev/null
+echo  $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME
+ytt -f $APP_HOME/$APP_NAME/base/config \
+    -f $PROFILE_HOME/$PROFILE/$APP_NAME \
+    -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
+    -f $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml \
+    | kbld -f- > temp/intermediate/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml
+
+clear
+imgpkg push -i $MY_REG/$PROFILE-$DEPLOYMENT-$APP_NAME-config:v1.0.0 \
+        -f temp/intermediate/$PROFILE-$DEPLOYMENT-$APP_NAME.yaml
+imgpkg pull -i $MY_REG/$PROFILE-$DEPLOYMENT-$APP_NAME-config:v1.0.0 \
+            -o deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config        
+        
+curl $MY_REG/v2/$PROFILE-$DEPLOYMENT-$APP_NAME-config/tags/list |jq
+```
+We need to apply the deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config/.yaml 
+to teh k8s cluster
+```shell
+mkdir -p temp/deployable
+kapp deploy -a $APP_NAME -f temp/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config
+```
+
+======================
 
 Bundles FLOW 2 - Decentralized approach 
 - I can resolve at the edge specific config
@@ -71,39 +103,17 @@ curl $MY_REG/v2/$PROFILE-$APP_NAME/tags/list |jq
 - we get the image and apply the location specific config (deployment folder) that can be located anywhere
 - (consider airgapped -> imgpkg copy/pull)
 ```shell
-mkdir -p temp/deployable
 imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:1.0.0 \
             -o temp/$PROFILE-$APP_NAME/bundle/config
             
 ytt -f temp/$PROFILE-$APP_NAME/bundle/config \
     -f temp/$PROFILE-$APP_NAME/bundle/config/.imgpkg/images.yml \
     -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
-    | kbld -f- > temp/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
+    | kbld -f- > deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
 ```
 SKIP to Packaging
-Create package metadata and schema
+Now we resolve and then deploy
 ```shell
-imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:1.0.0 \
-            -o temp/packages/$PROFILE/$APP_NAME/bundle
-ytt -f temp/packages/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
-    --data-values-schema-inspect -o openapi-v3 > packages/$PROFILE/$APP_NAME/schema-openapi.yml
-mv temp/packages/$PROFILE/$APP_NAME/bundle/.imgpkg/images.yml packages/$PROFILE/$APP_NAME/.imgpkg/images.yml
-imgpkg push -b $MY_REG/$PACKAGE_NAME:1.0.0 -f packages/$PROFILE/$APP_NAME
 
+kapp deploy -a $APP_NAME -f deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
 ```
-
-```shell
-imgpkg pull -b $MY_REG/$PACKAGE_NAME:1.0.0 -o temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/
-ytt -f temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/package-template.yml \
-    --data-value-file openapi=temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/schema-openapi.yml \
-    -v version="1.0.0" > pkg-repos/$PROFILE/packages/$PACKAGE_NAME/1.0.0.yml
-kbld -f pkg-repos/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output pkg-repos/$PROFILE/.imgpkg/images.yml
-imgpkg push -b gcr.io/pa-mbrodi/$PACKAGE_REPO_NAME:1.0.0 -f pkg-repos/$PROFILE
-```
-
-
-=============On the cluster:
-```shell
-kapp deploy -a repo -f pkg-repo-cr/$PROFILE/repo.yml -y
-```
-

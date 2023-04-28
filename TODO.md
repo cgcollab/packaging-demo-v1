@@ -1,4 +1,6 @@
-KBLD: CHANGE THIS FOR PROFILE
-    add the values files as they can have images in it
+create the package install
+separate env from script and cleanup script to run scripts for both app without cleaning up
+package hello-app and redis in one package repo
+slides
 
 
