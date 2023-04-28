@@ -1,4 +1,4 @@
 temp/
 .idea
 deployable/
-*/*lock.yml
+*/**/*lock.yml
