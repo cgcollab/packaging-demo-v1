@@ -1,8 +1,8 @@
 apiVersion: packaging.carvel.dev/v1alpha1
 kind: PackageRepository
 metadata:
-  name: simple-package-repository
+  name: lg-pkg-repo
 spec:
   fetch:
     imgpkgBundle:
-      image: gcr.io/pa-mbrodi/lg-pkg-repo:1.0.0
+      image: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo:1.0.0

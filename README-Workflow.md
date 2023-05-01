@@ -68,7 +68,6 @@ imgpkg push -b $MY_REG/$BUNDLE_NAME:1.0.0 \
             -f $APP_HOME/$APP_NAME/base \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
             --lock-output $APP_HOME/$APP_NAME/bundle.lock.yml
-#curl $MY_REG/v2/$PROFILE-$APP_NAME/tags/list |jq
 skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
 ```
 - then at the final location
@@ -87,26 +86,41 @@ SKIP to Packaging
 Create package metadata and schema
 ```shell
 imgpkg pull -b $MY_REG/$BUNDLE_NAME:1.0.0 \
-            -o temp/packages/$PROFILE/$APP_NAME/bundle
-ytt -f temp/packages/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
+            -o temp/app-bundles/$PROFILE/$APP_NAME/bundle
+ytt -f temp/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
     --data-values-schema-inspect -o openapi-v3 > packages/$PROFILE/$APP_NAME/schema-openapi.yml
-mv temp/packages/$PROFILE/$APP_NAME/bundle/.imgpkg/images.yml packages/$PROFILE/$APP_NAME/.imgpkg/images.yml
-imgpkg push -b $MY_REG/$PACKAGE_NAME:1.0.0 -f packages/$PROFILE/$APP_NAME
-
-```
-
-```shell
-imgpkg pull -b $MY_REG/$PACKAGE_NAME:1.0.0 -o temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/
-ytt -f temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/package-template.yml \
-    --data-value-file openapi=temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/schema-openapi.yml \
+#mv temp/app-bundles/$PROFILE/$APP_NAME/bundle/.imgpkg/images.yml packages/$PROFILE/$APP_NAME/.imgpkg/images.yml
+#imgpkg push -b $MY_REG/$PACKAGE_NAME:1.0.0 -f packages/$PROFILE/$APP_NAME
+#imgpkg pull -b $MY_REG/$PACKAGE_NAME:1.0.0 -o temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/
+ytt -f packages/$PROFILE/$APP_NAME/package-template.yml \
+    --data-value-file openapi=packages/$PROFILE/$APP_NAME/schema-openapi.yml \
     -v version="1.0.0" > pkg-repos/$PROFILE/packages/$PACKAGE_NAME/1.0.0.yml
+cp packages/$PROFILE/$APP_NAME/metadata.yml pkg-repos/$PROFILE/packages/$PACKAGE_NAME
 kbld -f pkg-repos/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output pkg-repos/$PROFILE/.imgpkg/images.yml
 imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:1.0.0 -f pkg-repos/$PROFILE
+
 ```
 
 
 =============On the cluster:
+This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
 ```shell
 kapp deploy -a repo -f pkg-repo-cr/$PROFILE/repo.yml -y
+kubectl get packagerepository -w
+```
+```shell
+kubectl get pkgm
+kubectl get packages 
+kubectl get package lg-hello-app.corp.com.1.0.0  -o yaml
 ```
 
+Deploy kapp-controller if not there
+```shell
+kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+kapp deploy -a default-ns-rbac -f https://raw.githubusercontent.com/vmware-tanzu/carvel-kapp-controller/develop/examples/rbac/default-ns.yml -y
+```
+
+```shell
+#kapp delete -a lg-hello-app       
+kapp deploy -a lg-hello-app -f pkg-repo-cr/$PROFILE/apps/$DEPLOYMENT/hello-app.yml -y
+```

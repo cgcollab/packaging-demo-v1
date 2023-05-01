@@ -16,11 +16,13 @@ spec:
     spec:
       fetch:
         - imgpkgBundle:
-            image: #@ "gcr.io/pa-mbrodi/gitopscon/lg-hello-app.corp.com:" + data.values.version
+            image: #@ "gcr.io/pa-mbrodi/gitopscon/lg-hello-app-bundle:" + data.values.version
       template:
         - ytt:
             paths:
               - "config/"
+              - "overlay/"
+              - "values/"
         - kbld:
             paths:
               - ".imgpkg/images.yml"

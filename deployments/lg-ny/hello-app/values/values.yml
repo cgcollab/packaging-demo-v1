@@ -4,7 +4,7 @@
 #! To override these values, use override files
 ---
 namespace:
-  name: coworking-space
+  name: ny-space
   #! Set to null to omit Namespace resource
   owner: null
 

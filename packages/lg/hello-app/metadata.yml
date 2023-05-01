@@ -4,8 +4,8 @@ metadata:
   # This will be the name of our package
   name: lg-hello-app.corp.com
 spec:
-  displayName: "Simple App"
-  longDescription: "Simple app consisting of a k8s deployment and service"
-  shortDescription: "Simple app for demoing"
+  displayName: "Hello App"
+  longDescription: "Hello app consisting of a k8s deployment and service"
+  shortDescription: "Hello app for demoing"
   categories:
     - demo
