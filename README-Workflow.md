@@ -16,7 +16,7 @@ Set all the var appropriately
 
 ```shell
 clear
-export MY_REG=localhost:5001
+export MY_REG=gcr.io/pa-mbrodi/gitopscon
 export PROFILE=lg
 export DEPLOYMENT_HOME=deployments
 export DEPLOYMENT=ny
@@ -25,6 +25,9 @@ export PROFILE_HOME=profiles
 export APP_NAME=hello-app
 export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
 export VERSION="1.0.0"
+export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
+export PACKAGE_NAME=$PROFILE-$APP_NAME.corp.com
+export PACKAGE_REPO_NAME=$PROFILE-pkg-repo
 rm -rf temp
 mkdir -p temp/intermediate
 rm -rf $APP_HOME/$APP_NAME/base/config/temp
@@ -61,29 +64,29 @@ kbld -f $APP_HOME/$APP_NAME/kbld.yml \
     -f $PROFILE_HOME/$PROFILE/$APP_NAME \
     --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
     > /dev/null
-imgpkg push -b $MY_REG/$PROFILE-$APP_NAME-bundle:1.0.0 \
+imgpkg push -b $MY_REG/$BUNDLE_NAME:1.0.0 \
             -f $APP_HOME/$APP_NAME/base \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
             --lock-output $APP_HOME/$APP_NAME/bundle.lock.yml
-curl $MY_REG/v2/$PROFILE-$APP_NAME/tags/list |jq
+#curl $MY_REG/v2/$PROFILE-$APP_NAME/tags/list |jq
+skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
 ```
 - then at the final location
 - we get the image and apply the location specific config (deployment folder) that can be located anywhere
 - (consider airgapped -> imgpkg copy/pull)
 ```shell
-mkdir -p temp/deployable
-imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:1.0.0 \
-            -o temp/$PROFILE-$APP_NAME/bundle/config
-            
-ytt -f temp/$PROFILE-$APP_NAME/bundle/config \
-    -f temp/$PROFILE-$APP_NAME/bundle/config/.imgpkg/images.yml \
-    -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
-    | kbld -f- > temp/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
+#mkdir -p temp/deployable
+#imgpkg pull -b $MY_REG/$BUNDLE_NAME:1.0.0 \
+#            -o temp/$PROFILE-$APP_NAME/bundle/config
+#            
+#ytt -f temp/$PROFILE-$APP_NAME/bundle/config \
+#    -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
+#    | kbld -f- > temp/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
 ```
 SKIP to Packaging
 Create package metadata and schema
 ```shell
-imgpkg pull -b $MY_REG/$PROFILE-$APP_NAME-bundle:1.0.0 \
+imgpkg pull -b $MY_REG/$BUNDLE_NAME:1.0.0 \
             -o temp/packages/$PROFILE/$APP_NAME/bundle
 ytt -f temp/packages/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
     --data-values-schema-inspect -o openapi-v3 > packages/$PROFILE/$APP_NAME/schema-openapi.yml
@@ -98,7 +101,7 @@ ytt -f temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/package-template.yml \
     --data-value-file openapi=temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/schema-openapi.yml \
     -v version="1.0.0" > pkg-repos/$PROFILE/packages/$PACKAGE_NAME/1.0.0.yml
 kbld -f pkg-repos/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output pkg-repos/$PROFILE/.imgpkg/images.yml
-imgpkg push -b gcr.io/pa-mbrodi/$PACKAGE_REPO_NAME:1.0.0 -f pkg-repos/$PROFILE
+imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:1.0.0 -f pkg-repos/$PROFILE
 ```
 
 

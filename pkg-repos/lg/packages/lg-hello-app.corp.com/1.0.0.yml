@@ -73,7 +73,7 @@ spec:
     spec:
       fetch:
       - imgpkgBundle:
-          image: localhost:5001/hello-app.corp.com:1.0.0
+          image: gcr.io/pa-mbrodi/gitopscon/hello-app.corp.com:1.0.0
       template:
       - ytt:
           paths:
