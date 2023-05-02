@@ -4,9 +4,9 @@
 apiVersion: data.packaging.carvel.dev/v1alpha1
 kind: Package
 metadata:
-  name: #@ "lg-giant-app.corp.com." + data.values.version
+  name: #@ "lg-hello-app.corp.com." + data.values.version
 spec:
-  refName: lg-giant-app.corp.com
+  refName: lg-hello-app.corp.com
   version: #@ data.values.version
   releaseNotes: |
     Initial release of the app package
@@ -16,7 +16,7 @@ spec:
     spec:
       fetch:
         - imgpkgBundle:
-            image: #@ "localhost:5001/gitopscon/lg-giant-app-bundle:" + data.values.version
+            image: #@ "gcr.io/pa-mbrodi/gitopscon/lg-hello-app-bundle:" + data.values.version
       template:
         - ytt:
             paths:

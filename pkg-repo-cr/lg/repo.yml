@@ -5,4 +5,4 @@ metadata:
 spec:
   fetch:
     imgpkgBundle:
-      image: localhost:5001/gitopscon/lg-pkg-repo:1.0.0
+      image: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo:0.0.1
