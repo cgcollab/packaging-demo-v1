@@ -1,3 +1,4 @@
 temp/
 .idea
 **/*lock.yml
+vendir/
