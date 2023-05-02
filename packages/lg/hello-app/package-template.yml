@@ -9,14 +9,14 @@ spec:
   refName: lg-hello-app.corp.com
   version: #@ data.values.version
   releaseNotes: |
-    Initial release of the simple app package
+    Initial release of the app package
   valuesSchema:
     openAPIv3: #@ yaml.decode(data.values.openapi)["components"]["schemas"]["dataValues"]
   template:
     spec:
       fetch:
         - imgpkgBundle:
-            image: #@ "gcr.io/pa-mbrodi/gitopscon/lg-hello-app-bundle:" + data.values.version
+            image: #@ "localhost:5001/gitopscon/lg-hello-app-bundle:" + data.values.version
       template:
         - ytt:
             paths:

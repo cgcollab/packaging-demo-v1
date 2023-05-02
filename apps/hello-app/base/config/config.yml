@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: hello-app
-          image: gcr.io/pa-mbrodi/gitopscon/hello-app
+          image: localhost:5001/gitopscon/hello-app
           ports:
             - containerPort: 8080
           env:
