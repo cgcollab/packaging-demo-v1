@@ -1,15 +1,18 @@
 # gitops-config
 
+
 ```shell
 source bin/set-app-env.sh hello-app lg ny
-source bin/clean-app-env.sh
 ```
-# ------- OR -------
+------- OR -------
 ```shell
 source bin/set-app-env.sh giant-app lg ny
-source bin/clean-app-env.sh
 ```
 
+CLEAN UP CAREFULL
+```shell
+source bin/clean-app-env.sh
+```
 Skip if Kind installed and running or using a different cluster
 ```shell
 mkdir $TEMP
@@ -53,29 +56,35 @@ skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
 #curl gcr.io/pa-mbrodi/v2/gitopscon/$BUNDLE_NAME/tags/list |jq
 ```
 
-Packaging
-Create package metadata and schema
+App Package
+Create package metadata and schema per app
 ```shell
 imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION \
             -o $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle
 ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
     --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
+ytt -f $PKG_REPO_HOME/package-template.yml \
+    --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml \
+    -v version="$VERSION" -v packageName="$PACKAGE_NAME" \
+    -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" \
+    > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/$VERSION.yml
+ytt -f $PKG_REPO_HOME/metadata.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME"\
+    > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/metadata.yml
 ```
 
+Package Repo
+After all apps have been packaged start packaging the repo
 ```shell
-ytt -f $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/package-template.yml \
-    --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml \
-    -v version="$VERSION" > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/$VERSION.yml
-kbld -f $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/.imgpkg/temp-images.yml
-cat $PKG_REPO_HOME/$PROFILE/.imgpkg/temp-images.yml >> $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
-echo "" >> $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
+kbld -f $PKG_REPO_HOME/$PROFILE/packages/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
 imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:0.0.1 -f $PKG_REPO_HOME/$PROFILE
 
 skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
 #curl gcr.io/pa-mbrodi/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
-
 #curl -X GET http://gcr.io/pa-mbrodi/v2/_catalog | jq
 
+ytt -f pkg-repo-cr/$PROFILE/repo-template.yml -v registry="$MY_REG" \
+    -v profile="$PROFILE" -v packageRepoVersion="0.0.1" |
+  kbld -f- --imgpkg-lock-output pkg-repo-cr/$PROFILE/.imgpkg/images.yml > pkg-repo-cr/$PROFILE/repo.yml
 ```
 
 
@@ -90,9 +99,10 @@ This PackageRepository CR will allow kapp-controller to install any of the packa
 tanzu package available list
 tanzu package installed list
 tanzu package installed delete lg-hello-app.corp.com -y
-
+tanzu package installed delete lg-gaint-app.corp.com -y
 kapp delete -a repo -y
 kapp delete -a lg-hello-app   -y
+kapp delete -a lg-giant-app   -y
 ```
 
 ```shell
@@ -108,4 +118,5 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 
 ```shell  
 kapp deploy -a lg-hello-app -f pkg-repo-cr/$PROFILE/apps/$DEPLOYMENT/hello-app.yml -y
+kapp deploy -a lg-giant-app -f pkg-repo-cr/$PROFILE/apps/$DEPLOYMENT/giant-app.yml -y
 ```
