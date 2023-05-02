@@ -1,0 +1,11 @@
+apiVersion: data.packaging.carvel.dev/v1alpha1
+kind: PackageMetadata
+metadata:
+  # This will be the name of our package
+  name: lg-giant-app.corp.com
+spec:
+  displayName: "Giant App"
+  longDescription: "Giant app consisting of a k8s deployment and service"
+  shortDescription: "Giant app for demoing"
+  categories:
+    - demo

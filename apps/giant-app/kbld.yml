@@ -2,12 +2,12 @@ apiVersion: kbld.k14s.io/v1alpha1
 kind: Config
 #! build image
 sources:
-- image: gcr.io/pa-mbrodi/gitopscon/giant-app
+- image: localhost:5001/gitopscon/giant-app
   path: temp/src/giant-app
   pack:
     build:
       builder: paketobuildpacks/builder
 #! publish (push) image
 destinations:
-- image: gcr.io/pa-mbrodi/gitopscon/giant-app
-  newImage: gcr.io/pa-mbrodi/gitopscon/giant-app
+- image: localhost:5001/gitopscon/giant-app
+  newImage: localhost:5001/gitopscon/giant-app

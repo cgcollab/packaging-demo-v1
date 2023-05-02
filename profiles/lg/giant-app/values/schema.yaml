@@ -1,10 +1,9 @@
-#@data/values
-
+#@data/values-schema
 #! This file contains default config values
 #! To override these values, use override files
 ---
 namespace:
-  name: hello-redis-lg
+  name: giant-app-lg
   #! Set to null to omit Namespace resource
   owner: true
 
