@@ -1,11 +1,21 @@
 # gitops-config
 
+```shell
+source bin/set-app-env.sh hello-app lg ny
+source bin/clean-app-env.sh
+```
+# ------- OR -------
+```shell
+source bin/set-app-env.sh giant-app lg ny
+source bin/clean-app-env.sh
+```
+
 Skip if Kind installed and running or using a different cluster
 ```shell
-mkdir temp
-curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh -o temp/kind-with-registry.sh \
-  && chmod +x temp/kind-with-registry.sh \
-  && ./temp/kind-with-registry.sh \
+mkdir $TEMP
+curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh -o $TEMP/kind-with-registry.sh \
+  && chmod +x $TEMP/kind-with-registry.sh \
+  && $TEMP/kind-with-registry.sh \
   && kubectl cluster-info --context kind-kind
 ```
 
@@ -15,27 +25,29 @@ Set the env var APP_NAME to point to the app
 Set all the var appropriately
 
 ```shell
-clear
-export MY_REG=gcr.io/pa-mbrodi/gitopscon
-export PROFILE=lg
-export DEPLOYMENT_HOME=deployments
-export DEPLOYMENT=ny
-export APP_HOME=apps
-export PROFILE_HOME=profiles
-export APP_NAME=hello-app
-export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
-export VERSION="1.0.0"
-export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
-export PACKAGE_NAME=$PROFILE-$APP_NAME.corp.com
-export PACKAGE_REPO_NAME=$PROFILE-pkg-repo
-rm -rf temp
-mkdir -p temp/intermediate
-rm -rf $APP_HOME/$APP_NAME/base/config/temp
-rm $APP_HOME/$APP_NAME/*lock*
-rm $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
-rm packages/lg/$APP_NAME/.imgpkg/images.yml
-rm packages/lg/$APP_NAME/schema-openapi.yml
-rm pkg-repos/$PROFILE/.imgpkg/images.yml
+#clear
+#export MY_REG=localhost:5001/gitopscon
+#export PROFILE=lg
+#export DEPLOYMENT_HOME=deployments
+#export DEPLOYMENT=ny
+#export APP_HOME=apps
+#export PROFILE_HOME=profiles
+#export APP_NAME=hello-app
+#export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
+#export VERSION="1.0.0"
+#export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
+#export PACKAGE_NAME=$PROFILE-$APP_NAME.corp.com
+#export PACKAGE_REPO_NAME=$PROFILE-pkg-repo
+#export PACKAGE_HOME=packages
+#export PKG_REPO_HOME=pkg-repos
+#rm -rf $TEMP
+#mkdir -p $TEMP/intermediate
+#rm -rf $APP_HOME/$APP_NAME/base/config/vendir
+#rm $APP_HOME/$APP_NAME/*lock*
+#rm $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
+#rm $PACKAGE_HOME/$PROFILE/$APP_NAME/.imgpkg/images.yml
+#rm $PACKAGE_HOME/$PROFILE/$APP_NAME/schema-openapi.yml
+#rm $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
 ```
 
 Downloading and incorporating application's dependencies
@@ -50,8 +62,8 @@ Clone the application and build it so that we can seal the images SHA
 in the images file:  $APP_HOME/$APP_NAME/base/config/.imgpkg/images.yml
 we are discarding the output as it's not resolved by ytt
 ```shell
-rm -rf temp/src/$APP_NAME
-git clone $APP_REPO temp/src/$APP_NAME
+rm -rf $TEMP/src/$APP_NAME
+git clone $APP_REPO $TEMP/src/$APP_NAME
 ```
 
 Bundles FLOW 2 - Decentralized approach 
@@ -64,40 +76,48 @@ kbld -f $APP_HOME/$APP_NAME/kbld.yml \
     -f $PROFILE_HOME/$PROFILE/$APP_NAME \
     --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml \
     > /dev/null
-imgpkg push -b $MY_REG/$BUNDLE_NAME:1.0.0 \
+imgpkg push -b $MY_REG/$BUNDLE_NAME:$VERSION \
             -f $APP_HOME/$APP_NAME/base \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
-            --lock-output $APP_HOME/$APP_NAME/bundle.lock.yml
-skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
+            --lock-output $APP_HOME/$APP_NAME/$PROFILE-bundle.$VERSION.lock.yml
+#skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
+curl localhost:5001/v2/gitopscon/$BUNDLE_NAME/tags/list |jq
 ```
 - then at the final location
 - we get the image and apply the location specific config (deployment folder) that can be located anywhere
 - (consider airgapped -> imgpkg copy/pull)
 ```shell
-#mkdir -p temp/deployable
-#imgpkg pull -b $MY_REG/$BUNDLE_NAME:1.0.0 \
-#            -o temp/$PROFILE-$APP_NAME/bundle/config
+#mkdir -p $TEMP/deployable
+#imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION \
+#            -o $TEMP/$PROFILE-$APP_NAME/bundle/config
 #            
-#ytt -f temp/$PROFILE-$APP_NAME/bundle/config \
+#ytt -f $TEMP/$PROFILE-$APP_NAME/bundle/config \
 #    -f $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME \
-#    | kbld -f- > temp/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
+#    | kbld -f- > $TEMP/deployable/$PROFILE-$DEPLOYMENT-$APP_NAME-config-flow2.yaml
 ```
 SKIP to Packaging
 Create package metadata and schema
 ```shell
-imgpkg pull -b $MY_REG/$BUNDLE_NAME:1.0.0 \
-            -o temp/app-bundles/$PROFILE/$APP_NAME/bundle
-ytt -f temp/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
-    --data-values-schema-inspect -o openapi-v3 > packages/$PROFILE/$APP_NAME/schema-openapi.yml
-#mv temp/app-bundles/$PROFILE/$APP_NAME/bundle/.imgpkg/images.yml packages/$PROFILE/$APP_NAME/.imgpkg/images.yml
-#imgpkg push -b $MY_REG/$PACKAGE_NAME:1.0.0 -f packages/$PROFILE/$APP_NAME
-#imgpkg pull -b $MY_REG/$PACKAGE_NAME:1.0.0 -o temp/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/
-ytt -f packages/$PROFILE/$APP_NAME/package-template.yml \
-    --data-value-file openapi=packages/$PROFILE/$APP_NAME/schema-openapi.yml \
-    -v version="1.0.0" > pkg-repos/$PROFILE/packages/$PACKAGE_NAME/1.0.0.yml
-cp packages/$PROFILE/$APP_NAME/metadata.yml pkg-repos/$PROFILE/packages/$PACKAGE_NAME
-kbld -f pkg-repos/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output pkg-repos/$PROFILE/.imgpkg/images.yml
-imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:1.0.0 -f pkg-repos/$PROFILE
+imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION \
+            -o $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle
+ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
+    --data-values-schema-inspect -o openapi-v3 > $PACKAGE_HOME/$PROFILE/$APP_NAME/schema-openapi.yml
+#mv $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/.imgpkg/images.yml $PACKAGE_HOME/$PROFILE/$APP_NAME/.imgpkg/images.yml
+#imgpkg push -b $MY_REG/$PACKAGE_NAME:$VERSION -f $PACKAGE_HOME/$PROFILE/$APP_NAME
+#imgpkg pull -b $MY_REG/$PACKAGE_NAME:$VERSION -o $TEMP/pkg-repos/$PROFILE/packages/$PACKAGE_NAME/
+ytt -f $PACKAGE_HOME/$PROFILE/$APP_NAME/package-template.yml \
+    --data-value-file openapi=$PACKAGE_HOME/$PROFILE/$APP_NAME/schema-openapi.yml \
+    -v version="$VERSION" > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/$VERSION.yml
+cp $PACKAGE_HOME/$PROFILE/$APP_NAME/metadata.yml $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/
+kbld -f $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/.imgpkg/temp-images.yml
+cat $PKG_REPO_HOME/$PROFILE/.imgpkg/temp-images.yml >> $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
+echo "" >> $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
+imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:0.0.1 -f $PKG_REPO_HOME/$PROFILE
+
+#skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
+curl localhost:5001/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
+
+curl -X GET http://localhost:5001/v2/_catalog | jq
 
 ```
 
@@ -111,7 +131,7 @@ kubectl get packagerepository -w
 ```shell
 kubectl get pkgm
 kubectl get packages 
-kubectl get package lg-hello-app.corp.com.1.0.0  -o yaml
+kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 ```
 
 Deploy kapp-controller if not there
