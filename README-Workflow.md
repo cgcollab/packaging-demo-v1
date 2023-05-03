@@ -117,6 +117,9 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 ```
 
 ```shell  
-kapp deploy -a lg-hello-app -f pkg-repo-cr/$PROFILE/apps/$DEPLOYMENT/hello-app.yml -y
-kapp deploy -a lg-giant-app -f pkg-repo-cr/$PROFILE/apps/$DEPLOYMENT/giant-app.yml -y
+kapp deploy -a lg-hello-app -f pkg-repo-cr/$PROFILE/packages/$DEPLOYMENT/hello-app.yml -y
+kapp deploy -a lg-giant-app -f pkg-repo-cr/$PROFILE/packages/$DEPLOYMENT/giant-app.yml -y
 ```
+
+tanzu package available get lg-hello-app.corp.com/1.0.0 --values-schema
+kubectl get package lg-hello-app.corp.com.1.0.0 -o yaml 

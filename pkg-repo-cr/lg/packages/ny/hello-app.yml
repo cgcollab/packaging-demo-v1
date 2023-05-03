@@ -8,15 +8,16 @@ spec:
     refName: lg-hello-app.corp.com
     versionSelection:
       constraints: 1.0.0
-#  values:
-#    - secretRef:
-#        name: lg-hello-app-values
-#---
-#apiVersion: v1
-#kind: Secret
-#metadata:
-#  name: lg-hello-app-values
-#stringData:
-#  values.yml: |
-#      name: hello-edge
-#      message: "LARGE NY"
+  values:
+    - secretRef:
+        name: lg-hello-app-values
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lg-hello-app-values
+stringData:
+  values.yml: |
+    helloApp:
+      name: hello-edge
+      message: "You Reached LG NY"
