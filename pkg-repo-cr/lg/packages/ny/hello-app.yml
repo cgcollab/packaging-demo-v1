@@ -20,4 +20,4 @@ stringData:
   values.yml: |
     helloApp:
       name: hello-edge
-      message: "You Reached LG NY"
+      message: "You Reached LG NY be happy"
