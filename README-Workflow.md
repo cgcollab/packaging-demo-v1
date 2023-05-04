@@ -2,16 +2,19 @@
 
 
 ```shell
-source bin/set-app-env.sh hello-app lg ny
+source scripts/set-app-env.sh hello-app lg ny
 ```
 ------- OR -------
 ```shell
-source bin/set-app-env.sh giant-app lg ny
+source scripts/set-app-env.sh giant-app lg ny
 ```
-
+------- OR -------
+```shell
+source scripts/set-app-env.sh hello-app sm mtv
+```
 CLEAN UP CAREFULL
 ```shell
-source bin/clean-app-env.sh
+source scripts/clean-app-env.sh
 ```
 Skip if Kind installed and running or using a different cluster
 ```shell
@@ -63,7 +66,7 @@ imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION \
             -o $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle
 ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
     --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
-ytt -f $PKG_REPO_HOME/package-template.yml \
+ytt -f $PKG_REPO_HOME/templates/package-template.yml \
     --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml \
     -v version="$VERSION" -v packageName="$PACKAGE_NAME" \
     -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" \
@@ -82,9 +85,9 @@ skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
 #curl gcr.io/pa-mbrodi/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
 #curl -X GET http://gcr.io/pa-mbrodi/v2/_catalog | jq
 
-ytt -f pkg-repo-cr/$PROFILE/repo-template.yml -v registry="$MY_REG" \
+ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" \
     -v profile="$PROFILE" -v packageRepoVersion="0.0.1" |
-  kbld -f- --imgpkg-lock-output pkg-repo-cr/$PROFILE/.imgpkg/images.yml > pkg-repo-cr/$PROFILE/repo.yml
+  kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.yml
 ```
 
 
@@ -101,13 +104,14 @@ tanzu package installed list
 tanzu package installed delete lg-hello-app.corp.com -y
 tanzu package installed delete lg-gaint-app.corp.com -y
 kapp delete -a repo -y
+kapp delete -a lg-ny-pkg-gitops -y
 kapp delete -a lg-hello-app   -y
 kapp delete -a lg-giant-app   -y
 ```
 
 ```shell
-kubectl apply -f pkg-repo-cr/ns-rbac-default.yml
-kapp deploy -a repo -f pkg-repo-cr/$PROFILE/repo.yml -y
+kubectl apply -f $DEPLOYMENT_HOME/ns-rbac-default.yml
+kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/repo.yml -y
 kubectl get packagerepository -w
 ```
 ```shell
@@ -117,9 +121,12 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 ```
 
 ```shell  
-kapp deploy -a lg-hello-app -f pkg-repo-cr/$PROFILE/packages/$DEPLOYMENT/hello-app.yml -y
-kapp deploy -a lg-giant-app -f pkg-repo-cr/$PROFILE/packages/$DEPLOYMENT/giant-app.yml -y
+kapp deploy -a lg-hello-app -f $DEPLOYMENT_HOME/$PROFILE/packages/$DEPLOYMENT/hello-app.yml -y
+kapp deploy -a lg-giant-app -f $DEPLOYMENT_HOME/$PROFILE/packages/$DEPLOYMENT/giant-app.yml -y
 ```
-
+Try also with kapp
+```shell
+kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/apps-pkg/$DEPLOYMENT/pkg-gitops.yml
+```
 tanzu package available get lg-hello-app.corp.com/1.0.0 --values-schema
 kubectl get package lg-hello-app.corp.com.1.0.0 -o yaml 
