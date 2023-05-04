@@ -12,7 +12,7 @@ spec:
     - git:
         url: https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config
         ref: origin/main
-        subPath: pkg-repo-cr/lg/apps/ny
+        subPath: deployments/lg/apps/ny
 
   template:
     - ytt: {}
