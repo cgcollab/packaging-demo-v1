@@ -26,9 +26,13 @@ export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
 export PACKAGE_NAME=$PROFILE-$APP_NAME.corp.com
 export PACKAGE_REPO_NAME=$PROFILE-pkg-repo
 
-mkdir -p $APP_HOME/$APP_NAME/base/.imgpkg/.gitkeep
-mkdir -p $DEPLOYMENT_HOME/$PROFILE-$DEPLOYMENT/$APP_NAME/overlays/.gitkeep
-mkdir -p $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/.gitkeep
-
+mkdir -p $APP_HOME/$APP_NAME/base/.imgpkg
+touch $APP_HOME/$APP_NAME/base/.imgpkg/.gitkeep
+mkdir -p $PKG_REPO_HOME/$PROFILE/$VERSION/packages/$PACKAGE_NAME
+mkdir -p $PKG_REPO_HOME/$PROFILE/$VERSION/packages/.imgpkg
+touch $PKG_REPO_HOME/$PROFILE/$VERSION/packages/.imgpkg/.gitkeep
+mkdir -p $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/.imgpkg
+touch $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/.imgpkg/.gitkeep
+mkdir -p $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/$DEPLOYMENT
 
 

@@ -56,7 +56,6 @@ imgpkg push -b $MY_REG/$BUNDLE_NAME:$VERSION \
             -f $PROFILE_HOME/$PROFILE/$APP_NAME \
             --lock-output $APP_HOME/$APP_NAME/$PROFILE-bundle.$VERSION.lock.yml
 skopeo list-tags docker://$MY_REG/$BUNDLE_NAME
-#curl gcr.io/pa-mbrodi/v2/gitopscon/$BUNDLE_NAME/tags/list |jq
 ```
 
 App Package
@@ -70,16 +69,16 @@ ytt -f $PKG_REPO_HOME/templates/package-template.yml \
     --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml \
     -v version="$VERSION" -v packageName="$PACKAGE_NAME" \
     -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" \
-    > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/$VERSION.yml
+    > $PKG_REPO_HOME/$PROFILE/$VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 ytt -f $PKG_REPO_HOME/metadata.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME"\
-    > $PKG_REPO_HOME/$PROFILE/packages/$PACKAGE_NAME/metadata.yml
+    > $PKG_REPO_HOME/$PROFILE/$VERSION/packages/$PACKAGE_NAME/metadata.yml
 ```
 
 Package Repo
 After all apps have been packaged start packaging the repo
 ```shell
-kbld -f $PKG_REPO_HOME/$PROFILE/packages/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/.imgpkg/images.yml
-imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:0.0.1 -f $PKG_REPO_HOME/$PROFILE
+kbld -f $PKG_REPO_HOME/$PROFILE/$VERSION/packages/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/$VERSION/.imgpkg/images.yml
+imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:0.0.1 -f $PKG_REPO_HOME/$PROFILE/$VERSION
 
 skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
 #curl gcr.io/pa-mbrodi/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
@@ -87,7 +86,7 @@ skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
 
 ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" \
     -v profile="$PROFILE" -v packageRepoVersion="0.0.1" |
-  kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.yml
+    kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/repo.yml
 ```
 
 
@@ -103,15 +102,16 @@ tanzu package available list
 tanzu package installed list
 tanzu package installed delete lg-hello-app.corp.com -y
 tanzu package installed delete lg-gaint-app.corp.com -y
-kapp delete -a repo -y
+
 kapp delete -a lg-ny-pkg-gitops -y
-kapp delete -a lg-hello-app   -y
-kapp delete -a lg-giant-app   -y
+#kapp delete -a lg-hello-app   -y
+#kapp delete -a lg-giant-app   -y
+kapp delete -a repo -y
 ```
 
 ```shell
 kubectl apply -f $DEPLOYMENT_HOME/ns-rbac-default.yml
-kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/repo.yml -y
+kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/repo.yml -y
 kubectl get packagerepository -w
 ```
 ```shell
@@ -121,8 +121,8 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 ```
 
 ```shell  
-kapp deploy -a lg-hello-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/hello-app.yml -y
-kapp deploy -a lg-giant-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/giant-app.yml -y
+kapp deploy -a lg-hello-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSIONpkg-installer/$DEPLOYMENT/hello-app.yml -y
+kapp deploy -a lg-giant-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSIONpkg-installer/$DEPLOYMENT/giant-app.yml -y
 ```
 Try also with kapp
 ```shell
