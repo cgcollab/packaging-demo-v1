@@ -64,7 +64,7 @@ Create package metadata and schema per app
 ```shell
 imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION \
             -o $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle
-ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/values/schema.yaml \
+ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/bundle/config/schema.yaml \
     --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
 ytt -f $PKG_REPO_HOME/templates/package-template.yml \
     --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml \
