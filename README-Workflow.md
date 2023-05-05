@@ -121,8 +121,8 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 ```
 
 ```shell  
-kapp deploy -a lg-hello-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer$DEPLOYMENT/hello-app.yml -y
-kapp deploy -a lg-giant-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer$DEPLOYMENT/giant-app.yml -y
+kapp deploy -a lg-hello-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/hello-app.yml -y
+kapp deploy -a lg-giant-app -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/giant-app.yml -y
 ```
 Try also with kapp
 ```shell
