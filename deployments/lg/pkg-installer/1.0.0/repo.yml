@@ -8,9 +8,9 @@ metadata:
         - resolved:
             tag: 0.0.1
             url: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo:0.0.1
-        url: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:e74b207a818efe4ef21f5e6d2de0b32232d1cb5a9a0a27122299b3823acb9096
+        url: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:6cf68badbc72906dc0e72fda22729c39f0986b4f21574d5b993ed0bce5c85997
   name: lg-pkg-repo
 spec:
   fetch:
     imgpkgBundle:
-      image: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:e74b207a818efe4ef21f5e6d2de0b32232d1cb5a9a0a27122299b3823acb9096
+      image: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:6cf68badbc72906dc0e72fda22729c39f0986b4f21574d5b993ed0bce5c85997

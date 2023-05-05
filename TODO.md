@@ -5,6 +5,7 @@
 ~~demo kapp-controller~~
 ~~update values,~~
 slides
+add repo and package version directory
 upgrade pkg 
 versioning/upgrade package and repo version
 cleanup variables from ytt put into file
