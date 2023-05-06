@@ -10,4 +10,4 @@ sources:
 #! publish (push) image
 destinations:
 - image: hello-app-image-build-me
-  newImage: localhost:5001/gitopscon/hello-app
+  newImage: gcr.io/pa-mbrodi/gitopscon/hello-app

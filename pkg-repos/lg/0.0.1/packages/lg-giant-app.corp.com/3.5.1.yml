@@ -71,7 +71,7 @@ spec:
     spec:
       fetch:
       - imgpkgBundle:
-          image: localhost:5001/gitopscon/lg-giant-app-bundle:3.5.1
+          image: gcr.io/pa-mbrodi/gitopscon/lg-giant-app-bundle:3.5.1
       template:
       - ytt:
           paths:

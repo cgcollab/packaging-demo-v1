@@ -10,4 +10,4 @@ sources:
 #! publish (push) image
 destinations:
 - image: giant-app-image-build-me
-  newImage: localhost:5001/gitopscon/giant-app
+  newImage: gcr.io/pa-mbrodi/gitopscon/giant-app
