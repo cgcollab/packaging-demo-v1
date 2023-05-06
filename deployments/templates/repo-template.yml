@@ -1,5 +1,4 @@
-#@ load("@ytt:data", "data")  # for reading data values (generated via ytt's data-values-schema-inspect mode).
-#@ load("@ytt:yaml", "yaml")  # for dynamically decoding the output of ytt's data-values-schema-inspect
+#@ load("@ytt:data", "data")
 ---
 apiVersion: packaging.carvel.dev/v1alpha1
 kind: PackageRepository

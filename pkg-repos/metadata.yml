@@ -1,5 +1,4 @@
-#@ load("@ytt:data", "data")  # for reading data values (generated via ytt's data-values-schema-inspect mode).
-#@ load("@ytt:yaml", "yaml")  # for dynamically decoding the output of ytt's data-values-schema-inspect
+#@ load("@ytt:data", "data")
 ---
 apiVersion: data.packaging.carvel.dev/v1alpha1
 kind: PackageMetadata
@@ -7,7 +6,7 @@ metadata:
   name: #@ data.values.packageName
 spec:
   displayName: #@ data.values.appName + " App"
-  longDescription: #@ data.values.appName + " app consisting of a k8s deployment and service"
-  shortDescription: #@ data.values.appName + " app for demoing"
+  longDescription: #@ data.values.appName + " app for demoing"
+  shortDescription: #@ data.values.appName + " app for deployment to Kubernetes"
   categories:
     - demo

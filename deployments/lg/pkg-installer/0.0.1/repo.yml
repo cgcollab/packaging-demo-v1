@@ -1,0 +1,16 @@
+---
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  annotations:
+    kbld.k14s.io/images: |
+      - origins:
+        - resolved:
+            tag: 0.0.1
+            url: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo:0.0.1
+        url: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:6cf68badbc72906dc0e72fda22729c39f0986b4f21574d5b993ed0bce5c85997
+  name: lg-pkg-repo
+spec:
+  fetch:
+    imgpkgBundle:
+      image: gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo@sha256:6cf68badbc72906dc0e72fda22729c39f0986b4f21574d5b993ed0bce5c85997
