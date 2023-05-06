@@ -7,7 +7,7 @@ spec:
   packageRef:
     refName: lg-giant-app.corp.com
     versionSelection:
-      constraints: 1.0.0
+      constraints: 3.5.1
   values:
     - secretRef:
         name: lg-giant-app-values
