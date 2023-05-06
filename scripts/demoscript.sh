@@ -135,18 +135,18 @@ kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
 kubectl get packages
 kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 
-#_ECHO_# At this point, you could imperatively install each of these Packages and apply the location-specific values...
-# e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
+#_ECHO_# To install the Package and to specify any final configuration values, we need a PackageInstall and Secret
 #_ECHO_OFF
 # TO DO: Create a PackageInstall template
 # Write a command here to generate a PackageInstall file
 # This file would eventually need to be committed to git when you decide to automate this with an App
 #_ECHO_ON
-#_ECHO_# But we'd rather define this declaratively!
 cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 
-#_ECHO_# And even better... we want to use GitOps to continuously apply this configuration.
-#_ECHO_# Of course, our PackageInstall files need to be in git...
+#_ECHO_# At this point, you could imperatively apply the PackageInstall and Secret to K8s, but... we'd rather automate this!
+# e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
+
+#_ECHO_# Of course, our PackageInstall and Secret would need to be available in a git repo...
 open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 # If you created a new app or a new version, git push the following files:
 #git add $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
@@ -154,8 +154,7 @@ open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tr
 #git commit -m "update"
 #git push
 
-#_ECHO_# To automate deploying this file when it changes, we can use Carvel kapp-controller
-#_ECHO_OFF
+#_ECHO_# And we can use Carvel kapp-controller to watch for changes in these files and automatically update the cluster#_ECHO_OFF
 ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
