@@ -114,6 +114,12 @@ clear
 #_ECHO_# Carvel provides a Kubernetes Controller called kapp-controller that can help automate pulling and installing packages
 #_ECHO_OFF
 # TO-DO - Should this repo.$REPO_VERSION.yml file be versioned or put under a different hierarchy?
+# TODO: Rework this command so as to suppress kbld output to /dev/null
+# ALSO: Philosophical question: should the repo be updated through automated gitops?
+#       Try this sometime: Split this command into two to capture the output of ytt
+#       Consider putting that in git with a corresponding App CRD to automate PkgRepo updates
+#       This about how to use kbld to control updates in this scenario
+#       Ex. What if repo template has version 5 and pkg repo 5.0 is upgraded to 5.1?
 ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
@@ -131,22 +137,28 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 
 #_ECHO_# At this point, you could imperatively install each of these Packages and apply the location-specific values...
 # e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
-
+#_ECHO_OFF
+# TO DO: Create a PackageInstall template
+# Write a command here to generate a PackageInstall file
+# This file would eventually need to be committed to git when you decide to automate this with an App
+#_ECHO_ON
 #_ECHO_# But we'd rather define this declaratively!
 cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 
-#_ECHO_# And even better... we want to use GitOps to continuously apply this configuration. kapp-controller has our backs!
+#_ECHO_# And even better... we want to use GitOps to continuously apply this configuration.
+#_ECHO_# Of course, our PackageInstall files need to be in git...
+open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+# If you created a new app or a new version, git push the following files:
+#git add $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+#git add $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+#git commit -m "update"
+#git push
+
+#_ECHO_# To automate deploying this file when it changes, we can use Carvel kapp-controller
 #_ECHO_OFF
 ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
-#_ECHO_# Of course, the referenced file(s) need to be in git!
-open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
-# If you created a new app or a new version, git push the following files:
-#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
-#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
-#git commit -m "$PACKAGE_NAME $VERSION"
-#git push
 
 # TODO: Try also with kapp
 kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
