@@ -18,8 +18,9 @@
 #  && kubectl cluster-info --context kind-kind
 # export MY_REG=localhost:5001/gitopscon
 
-# kapp-controller installation:
+# kapp-controller installation and RBAC configuration:
 #kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
+#kubectl apply -f $DEPLOYMENT_HOME/ns-rbac-default.yml
 
 #_ECHO_OFF
 
@@ -125,7 +126,6 @@ ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" -v pro
 cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 
 #_ECHO_# Let's apply this to the cluster!
-kubectl apply -f $DEPLOYMENT_HOME/ns-rbac-default.yml
 # TODO: This step fails if the pkg-repo image is on kind. Just move this one to gcr and all is good
 kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
 
