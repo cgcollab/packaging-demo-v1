@@ -97,6 +97,8 @@ ytt -f $PKG_REPO_HOME/templates/package-template.yml --data-value-file openapi=$
 #_ECHO_ON
 cat $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 
+# MOVE THIS TO WHERE IT IS APPROPRIATE - SANITY CHECK THAT THIS FILE IS GIT:
+open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 # If you created a new app or a new version, git push the following files:
 #git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 #git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
@@ -107,7 +109,10 @@ clear
 #_ECHO_# Most likely you have many apps, so you'll have many Packages, and you'll need to send all of them to many target locations.
 tree $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/
 #_ECHO_# How can you bundle and distribute these easily for deployment at many target locations? Remember our friend imgpkg?
-kbld -f $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/images.yml
+kbld -f $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/images.yml > /dev/null
+
+# TODO: This file should also be in git, along with the corrresponding packageinstaller and location values config: $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/images.yml
+
 imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -f $PKG_REPO_HOME/$PROFILE/$REPO_VERSION
 skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME  #OR curl localhost:5001/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
 #curl -X GET http://localhost:5001/v2/_catalog | jq
@@ -143,7 +148,14 @@ cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.
 ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
-open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/deployments/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+#_ECHO_# Of course, the referenced file(s) need to be in git!
+open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+# If you created a new app or a new version, git push the following files:
+#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+#git commit -m "$PACKAGE_NAME $VERSION"
+#git push
+
 # TODO: Try also with kapp
 kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 
