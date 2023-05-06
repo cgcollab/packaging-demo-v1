@@ -1,0 +1,14 @@
+---
+apiVersion: imgpkg.carvel.dev/v1alpha1
+images:
+- annotations:
+    kbld.carvel.dev/id: giant-app-image-build-me
+    kbld.carvel.dev/origins: |
+      - local:
+          path: /Users/mbrodi/git/conference/Cd-Vancouver/gitops-config/temp/src/giant-app
+      - git:
+          dirty: false
+          remoteURL: git@github.com:GitOpsCon2023-gitops-edge-configuration/giant-app.git
+          sha: 75633ad18c2b42a0fce7894d23ec5fbb04571d96
+  image: gcr.io/pa-mbrodi/gitopscon/giant-app@sha256:c273b51a36b324570a28cd4f2334ea06bcdb980b19199638dc116f9635ef2a71
+kind: ImagesLock

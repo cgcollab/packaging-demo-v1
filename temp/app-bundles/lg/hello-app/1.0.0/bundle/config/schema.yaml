@@ -1,0 +1,27 @@
+#@data/values-schema
+#! This file contains default config values
+#! To override these values, use override files
+---
+namespace:
+  name: hello-app-lg
+  #@schema/desc "Set to null to omit Namespace resource"
+  #@schema/type any=True
+  owner: true
+
+helloApp:
+  name: hello-app
+  #@schema/desc "Name used in hello message from app when app is pinged."
+  message: "default large"
+
+  memRequest: "64Mi"
+  cpuRequest: "250m"
+  memLimit: "128Mi"
+  cpuLimit: "500m"
+
+  ingress:
+    hostname: my-hostname
+    domain: domain.com
+    class: contour
+    secret:
+      certificate: this-is-a-CA
+      privateKey: this-is-private-key

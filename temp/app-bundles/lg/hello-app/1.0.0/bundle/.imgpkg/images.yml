@@ -1,0 +1,28 @@
+---
+apiVersion: imgpkg.carvel.dev/v1alpha1
+images:
+- annotations:
+    kbld.carvel.dev/id: docker.io/redis:6.0.5
+    kbld.carvel.dev/origins: |
+      - resolved:
+          tag: 6.0.5
+          url: docker.io/redis:6.0.5
+  image: index.docker.io/library/redis@sha256:800f2587bf3376cb01e6307afe599ddce9439deafbd4fb8562829da96085c9c5
+- annotations:
+    kbld.carvel.dev/id: gcr.io/google_samples/gb-redis-follower:v2
+    kbld.carvel.dev/origins: |
+      - resolved:
+          tag: v2
+          url: gcr.io/google_samples/gb-redis-follower:v2
+  image: gcr.io/google_samples/gb-redis-follower@sha256:18265f60d9eed3217e89a57bab5c70afec7e8fbe5ec315fadb9d4037cfc3c5ad
+- annotations:
+    kbld.carvel.dev/id: hello-app-image-build-me
+    kbld.carvel.dev/origins: |
+      - local:
+          path: /Users/mbrodi/git/conference/Cd-Vancouver/gitops-config/temp/src/hello-app
+      - git:
+          dirty: false
+          remoteURL: git@github.com:GitOpsCon2023-gitops-edge-configuration/hello-app.git
+          sha: f9f59c38ead0b7bf91ceefd4f5d1926740be2522
+  image: gcr.io/pa-mbrodi/gitopscon/hello-app@sha256:422a6cbc8c2bbfa5ac934cbe41bae0a7d7a77159d7c1768bea409d5fbb45066f
+kind: ImagesLock

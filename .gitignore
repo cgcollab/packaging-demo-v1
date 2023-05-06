@@ -1,6 +1,3 @@
-temp/
+temp/src
 .idea
-**/*lock.yml
-vendir/
-**/.imgpkg/images.yml
 **/.DS_Store

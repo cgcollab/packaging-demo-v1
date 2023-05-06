@@ -1,0 +1,6 @@
+---
+apiVersion: imgpkg.carvel.dev/v1alpha1
+bundle:
+  image: gcr.io/pa-mbrodi/gitopscon/lg-hello-app-bundle@sha256:be9959e7c00f74798ace9a03f165f6234260ccf8e16058bd5bd48bd4b549cdca
+  tag: 1.0.0
+kind: BundleLock

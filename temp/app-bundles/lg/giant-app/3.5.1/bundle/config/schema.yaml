@@ -1,0 +1,25 @@
+#@data/values-schema
+#! This file contains default config values
+#! To override these values, use override files
+---
+namespace:
+  name: giant-app-lg
+  #! Set to null to omit Namespace resource
+  owner: true
+
+giantApp:
+  name: giant-app
+  message: "default large"
+
+  memRequest: "128Mi"
+  cpuRequest: "500m"
+  memLimit: "256Mi"
+  cpuLimit: "1000m"
+
+  ingress:
+    hostname: my-hostname
+    domain: domain.com
+    class: contour
+    secret:
+      certificate: this-is-a-CA
+      privateKey: this-is-private-key

@@ -1,0 +1,6 @@
+---
+apiVersion: imgpkg.carvel.dev/v1alpha1
+bundle:
+  image: gcr.io/pa-mbrodi/gitopscon/lg-giant-app-bundle@sha256:62208e0972a488061ae885f3cac77f5982534b92062985ab7078032a32539050
+  tag: 3.5.1
+kind: BundleLock
