@@ -76,8 +76,7 @@ imgpkg push -b $MY_REG/$BUNDLE_NAME:$VERSION -f $APP_HOME/$APP_NAME/base -f $PRO
 skopeo list-tags docker://$MY_REG/$BUNDLE_NAME #OR: curl localhost:5001/v2/gitopscon/$BUNDLE_NAME/tags/list |jq
 
 #_ECHO_# What exactly is in the bundle we created? Let's take a look... imgpkg makes it easy to move or share our app bundle
-imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION -o $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle
-tree $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle
+imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION -o $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle; tree -a $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle
 
 #_ECHO_# One nifty thing in this bundle is the app's values schema file. We can use it to understand all configurable values:
 ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle/config/schema.yaml --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
@@ -111,7 +110,7 @@ clear
 #_ECHO_# Let's consider the perspective of the target deployment location. How do we get the PackageRepo into our cluster?
 #_ECHO_# Carvel provides a Kubernetes Controller called kapp-controller that can help automate pulling and installing packages
 #_ECHO_OFF
-# TO-DO - SHould this repo.$REPO_VERSION.yml file be versioned or put under a different hierarchy?
+# TO-DO - Should this repo.$REPO_VERSION.yml file be versioned or put under a different hierarchy?
 ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
@@ -131,7 +130,7 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 # e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
 
 #_ECHO_# But we'd rather define this declaratively!
-cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/$DEPLOYMENT/$APP_NAME.yml
+cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 
 #_ECHO_# And even better... we want to use GitOps to continuously apply this configuration. kapp-controller has our backs!
 #_ECHO_OFF
@@ -139,7 +138,8 @@ ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" 
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/deployments/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
-kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml  # Try also with kapp
+# TODO: Try also with kapp
+kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 
 #_ECHO_# Now every time a location wants to upgrade a package or change local vales, they just need to make a git commit!
 
