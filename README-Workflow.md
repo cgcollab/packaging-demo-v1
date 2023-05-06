@@ -78,14 +78,14 @@ Package Repo
 After all apps have been packaged start packaging the repo
 ```shell
 kbld -f $PKG_REPO_HOME/$PROFILE/$VERSION/packages/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/$VERSION/.imgpkg/images.yml
-imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:0.0.1 -f $PKG_REPO_HOME/$PROFILE/$VERSION
+imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -f $PKG_REPO_HOME/$PROFILE/$VERSION
 
 skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME
-#curl gcr.io/pa-mbrodi/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
-#curl -X GET http://gcr.io/pa-mbrodi/v2/_catalog | jq
+#curl localhost:5001/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
+#curl -X GET http://localhost:5001/v2/_catalog | jq
 
 ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" \
-    -v profile="$PROFILE" -v packageRepoVersion="0.0.1" |
+    -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" |
     kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$VERSION/repo.yml
 ```
 
