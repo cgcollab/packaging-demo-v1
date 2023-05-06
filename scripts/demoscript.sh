@@ -11,11 +11,11 @@
 ## 4. Install Carvel CLIs
 
 # Kind with registry installation:
-#mkdir $TEMP
-#curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh -o $TEMP/kind-with-registry.sh \
-#  && chmod +x $TEMP/kind-with-registry.sh \
-#  && $TEMP/kind-with-registry.sh \
-#  && kubectl cluster-info --context kind-kind
+#curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh -o kind-with-registry.sh \
+#  && chmod +x kind-with-registry.sh \
+#  && kind-with-registry.sh \
+#  && kubectl cluster-info --context kind-kind \
+#  && rm kind-with-registry.sh
 # export MY_REG=localhost:5001/gitopscon
 
 # kapp-controller installation and RBAC configuration:
