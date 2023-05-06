@@ -35,7 +35,6 @@ source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${PROFILE:=lg
 
 echo "Cloning source code"
 mkdir -p $TEMP/src/$APP_NAME && rm -rf $TEMP/src/$APP_NAME && git clone $APP_REPO $TEMP/src/$APP_NAME
-mkdir -p $DEPLOYMENT_HOME && rm -rf $DEPLOYMENT_HOME && git clone $DEPLOYMENT_REPO $DEPLOYMENT_HOME
 
 clear
 #_ECHO_ON

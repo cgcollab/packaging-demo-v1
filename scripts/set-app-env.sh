@@ -34,12 +34,11 @@ else
   read -p "-----> OTHERWISE QUIT NOW AND CHECK USAGE INSTRUCTIONS: $0 --help" CONTINUE
 
   export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
-  export DEPLOYMENT_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/gitops-deployments.git
 
   export TEMP=$HOME_DIR/temp
   export APP_HOME=$HOME_DIR/apps
   export PROFILE_HOME=$HOME_DIR/profiles
-  export DEPLOYMENT_HOME=$TEMP/deployments
+  export DEPLOYMENT_HOME=$HOME_DIR/deployments
   export PKG_REPO_HOME=$HOME_DIR/pkg-repos
 
   export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
