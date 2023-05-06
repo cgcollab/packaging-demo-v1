@@ -97,6 +97,12 @@ ytt -f $PKG_REPO_HOME/templates/package-template.yml --data-value-file openapi=$
 #_ECHO_ON
 cat $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 
+# If you created a new app or a new version, git push the following files:
+#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+#git add $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+#git commit -m "$PACKAGE_NAME $VERSION"
+#git push
+
 clear
 #_ECHO_# Most likely you have many apps, so you'll have many Packages, and you'll need to send all of them to many target locations.
 tree $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/
