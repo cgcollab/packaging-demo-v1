@@ -3,3 +3,4 @@ temp/
 **/*lock.yml
 vendir/
 **/.imgpkg/images.yml
+**/.DS_Store
