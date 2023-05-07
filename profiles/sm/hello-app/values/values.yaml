@@ -3,14 +3,14 @@
 #! To override these values, use override files
 ---
 namespace:
-  name: hello-app-lg
+  name: hello-app-sm
   owner: true
 
 helloApp:
   name: hello-app
-  message: "large"
+  message: "small"
 
-  memRequest: "64Mi"
-  cpuRequest: "250m"
-  memLimit: "128Mi"
-  cpuLimit: "500m"
+  mem-request: "24Mi"
+  cpu-request: "100m"
+  mem-limit: "64Mi"
+  cpu-limit: "250m"

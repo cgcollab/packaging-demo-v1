@@ -1,4 +1,0 @@
-mem-request: "24Mi"
-cpu-request: "100m"
-mem-limit: "64Mi"
-cpu-limit: "250m"

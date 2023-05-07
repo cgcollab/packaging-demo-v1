@@ -121,7 +121,7 @@ clear
 #       Consider putting that in git with a corresponding App CRD to automate PkgRepo updates
 #       This about how to use kbld to control updates in this scenario
 #       Ex. What if repo template has version 5 and pkg repo 5.0 is upgraded to 5.1?
-ytt -f $DEPLOYMENT_HOME/templates/repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
+ytt -f $DEPLOYMENT_HOME/templates/pkg-repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 

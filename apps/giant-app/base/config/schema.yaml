@@ -9,7 +9,7 @@ namespace:
 
 giantApp:
   name: giant-app
-  message: "default configuration"
+  message: "default"
 
   memRequest: "128Mi"
   cpuRequest: "500m"

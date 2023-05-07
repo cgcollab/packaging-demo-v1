@@ -5,4 +5,4 @@
 ---
 spec:
   #@overlay/match missing_ok=True
-  replicas: 3
+  replicas: 2

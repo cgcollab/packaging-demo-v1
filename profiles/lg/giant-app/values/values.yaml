@@ -4,12 +4,11 @@
 ---
 namespace:
   name: giant-app-lg
-  #! Set to null to omit Namespace resource
   owner: true
 
 giantApp:
   name: giant-app
-  message: "default large"
+  message: "large"
 
   memRequest: "128Mi"
   cpuRequest: "500m"

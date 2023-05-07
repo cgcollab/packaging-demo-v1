@@ -1,21 +1,8 @@
-#@data/values
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
 
-#! This file contains default config values
-#! To override these values, use override files
+#@overlay/match by=overlay.and_op(overlay.subset({"kind": "Deployment"}), overlay.subset({"metadata": {"name": data.values.helloApp.name}}))
 ---
-namespace:
-  name: carvel-demo
-  #! Set to null to omit Namespace resource
-  owner: null
-
-helloApp:
-  name: hello-app
-  message: "large stranger"
-
-  ingress:
-    hostname: null
-    domain: null
-    class: null
-    secret:
-      certificate: null
-      privateKey: null
+spec:
+  #@overlay/match missing_ok=True
+  replicas: 1
