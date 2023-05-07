@@ -1,6 +1,8 @@
-temp/
 .idea
+**/.DS_Store
+temp/
+**/.imgpkg/images.yml
 **/*lock.yml
 vendir/
-**/.imgpkg/images.yml
-**/.DS_Store
+pkg-repos/*/*/packages/*/metadata.yml
+pkg-repos/lg/0.0.1/packages/lg-hello-app.corp.com/*.yml

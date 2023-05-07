@@ -3,13 +3,13 @@
 #! To override these values, use override files
 ---
 namespace:
-  name: giant-app-lg
+  name: giant-app
   #! Set to null to omit Namespace resource
-  owner: true
+  owner: null
 
 giantApp:
   name: giant-app
-  message: "default large"
+  message: "default configuration"
 
   memRequest: "128Mi"
   cpuRequest: "500m"
@@ -17,9 +17,9 @@ giantApp:
   cpuLimit: "1000m"
 
   ingress:
-    hostname: my-hostname
-    domain: domain.com
-    class: contour
+    hostname: null
+    domain: null
+    class: null
     secret:
-      certificate: this-is-a-CA
-      privateKey: this-is-private-key
+      certificate: null
+      privateKey: null
