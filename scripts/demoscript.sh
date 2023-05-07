@@ -88,7 +88,7 @@ yq $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
 # TO-DO: Consider: maybe this should be the first profile-specific artifact? One app, one package per profile?
 #_ECHO_# Let's start with PackageMetadata, a way to provide some metadata to Kubernetes
 #_ECHO_OFF
-ytt -f $PKG_REPO_HOME/metadata.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+ytt -f $PKG_REPO_HOME/templates/metadata-template.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 #_ECHO_ON
 cat $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 

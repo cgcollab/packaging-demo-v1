@@ -70,7 +70,7 @@ ytt -f $PKG_REPO_HOME/templates/package-template.yml \
     -v version="$VERSION" -v packageName="$PACKAGE_NAME" \
     -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" \
     > $PKG_REPO_HOME/$PROFILE/$VERSION/packages/$PACKAGE_NAME/$VERSION.yml
-ytt -f $PKG_REPO_HOME/metadata.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME"\
+ytt -f $PKG_REPO_HOME/templates/metadata-template.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME"\
     > $PKG_REPO_HOME/$PROFILE/$VERSION/packages/$PACKAGE_NAME/metadata.yml
 ```
 
