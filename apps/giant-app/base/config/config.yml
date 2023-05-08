@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
         - name: giant-app
-          image: giant-app-image-build-me
+          image: localhost:5001/gitopscon/giant-app
           ports:
             - containerPort: 8080
           env:

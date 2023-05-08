@@ -22,7 +22,8 @@ source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${PROFILE:=lg
 
 echo "Cloning source code"
 mkdir -p $TEMP/src/$APP_NAME && rm -rf $TEMP/src/$APP_NAME && git clone $APP_REPO $TEMP/src/$APP_NAME
-sed -i '' "s|localhost:5001/gitopscon|$MY_REG|g" $APP_HOME/$APP_NAME/kbld.yml
+#sed -i '' "s|localhost:5001/gitopscon|$MY_REG|g" $APP_HOME/$APP_NAME/kbld.yml
+myReg=$MY_REG yq '.destinations[0].newImage = env(myReg)' $APP_HOME/$APP_NAME/kbld.yml
 clear
 #_ECHO_ON
 #_ECHO_# Let's package an app for distribution & deployment using Project Carvel!
@@ -137,7 +138,8 @@ open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tr
 #git commit -m "update"
 #git push
 
-#_ECHO_# And we can use Carvel kapp-controller to watch for changes in these files and automatically update the cluster#_ECHO_OFF
+#_ECHO_# And we can use Carvel kapp-controller to watch for changes in these files and automatically update the cluster
+#_ECHO_OFF
 ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
 cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
