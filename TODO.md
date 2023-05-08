@@ -16,4 +16,4 @@ replicate at the edge
 - argoCD
 antigoals
 - showcase secrets management
-
+- add test fro .imgpkg before running kbld

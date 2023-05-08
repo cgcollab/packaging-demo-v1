@@ -10,7 +10,7 @@ helloApp:
   name: hello-app
   message: "small"
 
-  mem-request: "24Mi"
-  cpu-request: "100m"
-  mem-limit: "64Mi"
-  cpu-limit: "250m"
+  memRequest: "24Mi"
+  cpuRequest: "100m"
+  memLimit: "64Mi"
+  cpuLimit: "250m"

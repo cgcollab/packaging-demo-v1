@@ -6,6 +6,7 @@ namespace:
   name: hello-app
   #@schema/desc "Set to null to omit Namespace resource"
   #@schema/type any=True
+  #@schema/nullable
   owner: null
 
 helloApp:
@@ -20,9 +21,19 @@ helloApp:
 
   #@schema/desc "Set hostname and domain to null to omit Ingress resource"
   ingress:
+    #@schema/type any=True
+    #@schema/nullable
     hostname: null
+    #@schema/type any=True
+    #@schema/nullable
     domain: null
+    #@schema/type any=True
+    #@schema/nullable
     class: null
     secret:
+      #@schema/type any=True
+      #@schema/nullable
       certificate: null
+      #@schema/type any=True
+      #@schema/nullable
       privateKey: null

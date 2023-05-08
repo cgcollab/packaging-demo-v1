@@ -5,23 +5,9 @@
 # source scripts/clean-app-env.sh
 
 ###### Pre-requisites:
-## 1. Authenticate docker to the image registry you want to use (see Kind option below)
-## 2. Set kube context to the Kubernetes cluster you want to use (see Kind option below)
-## 3. Install kapp-controller to the cluster (see kapp-controller instruction below)
-## 4. Install Carvel CLIs
-
-# Kind with registry installation:
-#curl https://kind.sigs.k8s.io/examples/kind-with-registry.sh -o kind-with-registry.sh \
-#  && chmod +x kind-with-registry.sh \
-#  && kind-with-registry.sh \
-#  && kubectl cluster-info --context kind-kind \
-#  && rm kind-with-registry.sh
-# export MY_REG=localhost:5001/gitopscon
-
-# kapp-controller installation and RBAC configuration:
-#kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml
-#kubectl apply -f $DEPLOYMENT_HOME/ns-rbac-default.yml
-
+#kubectl api-resources |grep kapp
+#TODO
+#check for kapp and run prerequisites or abort if not installed
 #_ECHO_OFF
 
 DEMO_HOME=$( pwd )
@@ -36,7 +22,7 @@ source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${PROFILE:=lg
 
 echo "Cloning source code"
 mkdir -p $TEMP/src/$APP_NAME && rm -rf $TEMP/src/$APP_NAME && git clone $APP_REPO $TEMP/src/$APP_NAME
-
+sed -i '' "s|localhost:5001/gitopscon|$MY_REG|g" $APP_HOME/$APP_NAME/kbld.yml
 clear
 #_ECHO_ON
 #_ECHO_# Let's package an app for distribution & deployment using Project Carvel!
@@ -57,16 +43,13 @@ kbld inspect -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --c
 # TO-DO: What is kbld flag --unresolved-inspect
 
 #_ECHO_# Looks like we still need to build our app into an image and replace all tags with SHAs. kbld can help here too!
-cat $APP_HOME/$APP_NAME/kbld.yml
-
-# TO-DO: In $APP_HOME/$APP_NAME/base/config, create values and overlay sibling dirs
-
-# Note: Here we use kbld to build app, resolve tags, and generate images.yml.
-#       However, we discard the stdout YAML output as we have not yet processed the input with ytt.
-#       WAIT WHAT? WE WEREN'T APPLYING YTT BEFORE BUNDLING THE APP ANYWAY!?
-#       MAYBE WE JUST DISCARD THE OUTPUT SO WE CAN BUNDLE THE FILES WITH THE ORIGINAL DIR STRUCTURE
-#       BUT THEN WE DEF NEED TO INCLUDE THE IMAGES.YML FILE!!! OTHERWISE WHAT WAS THE POINT OF RESOLVING NOW, OTHER THAN BUILDING THE APP?
-kbld -f $APP_HOME/$APP_NAME/kbld.yml -f $APP_HOME/$APP_NAME/base/config -f $PROFILE_HOME/$PROFILE/$APP_NAME --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml > /dev/null
+#_ECHO_OFF
+# To instruct kbld to re-build the app from source code, remove the app resolution details from images.yaml or delete images.yml
+if [[ -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml ]]; then unset BUILD_FLAG; else export BUILD_FLAG="-f apps/hello-app/kbld.yml"; fi;
+#cat $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
+#cat $APP_HOME/$APP_NAME/kbld.yml
+#_ECHO_ON
+kbld $BUILD_FLAG -f $APP_HOME/$APP_NAME/base/config -f $PROFILE_HOME/$PROFILE/$APP_NAME --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml > /dev/null
 
 #_ECHO_# We now have a Bill of Materials that we can use to lock down these SHAs for our images!
 cat $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
@@ -127,7 +110,7 @@ cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 
 #_ECHO_# Let's apply this to the cluster!
 # TODO: This step fails if the pkg-repo image is on kind. Just move this one to gcr and all is good
-kapp deploy -a repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
+kapp deploy -a $PROFILE-pkg-repo- -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
 
 #_ECHO_# We can now list all of the available Packages in the PackageRepository
 # kubectl get packagerepository
