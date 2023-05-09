@@ -1,5 +1,7 @@
 .idea
 **/.DS_Store
+#scripts/demorunner.sh
+kind-with-registry.sh
 temp/
 **/.imgpkg/images.yml
 **/*lock.yml
