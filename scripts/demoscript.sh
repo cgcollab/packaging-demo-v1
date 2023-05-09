@@ -158,6 +158,12 @@ kubectl get packagerepository
 kubectl get packages
 kubectl get packageinstalls
 
+#_ECHO_# What if the target location is Air_Gapped?
+#_ECHO_# imgpck can help!
+imgpkg copy -b gcr.io/pa-mbrodi/gitopscon/lg-pkg-repo:0.0.1 --to-repo gcr.io/pa-mbrodi/temp/lg-pkg-repo
+tree -a vancouver2023
+cat vancouver2023/.imgpkg/images.yml
+
 ##This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
 #tanzu package available list
 #tanzu package installed list
