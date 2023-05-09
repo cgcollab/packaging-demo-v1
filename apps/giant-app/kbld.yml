@@ -11,3 +11,4 @@ sources:
 destinations:
 - image: localhost:5001/gitopscon/giant-app
   newImage: localhost:5001/gitopscon/giant-app
+  tags: [latest]
