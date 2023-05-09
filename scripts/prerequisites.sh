@@ -47,6 +47,7 @@ else
     && kubectl cluster-info --context kind-kind \
     && rm kind-with-registry.sh
    export MY_REG=localhost:5001/gitopscon
+   export EDGE_REG=localhost:5001/gitopscon-edge
 
   # kapp-controller installation and RBAC configuration:
   kapp deploy -a kc -f https://github.com/vmware-tanzu/carvel-kapp-controller/releases/latest/download/release.yml

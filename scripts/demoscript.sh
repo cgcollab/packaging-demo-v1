@@ -158,6 +158,12 @@ kubectl get packagerepository
 kubectl get packages
 kubectl get packageinstalls
 
+#_ECHO_# What if the target location is gir-gapped? imgpck can help!
+imgpkg copy -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION --to-repo $EDGE_REG/$PACKAGE_REPO_NAME
+imgpkg pull -b $EDGE_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -o $TEMP/airgapped
+tree -a $TEMP/airgapped
+cat $TEMP/airgapped/.imgpkg/images.yml
+
 ##This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
 #tanzu package available list
 #tanzu package installed list
