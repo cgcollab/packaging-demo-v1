@@ -111,7 +111,7 @@ cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 
 #_ECHO_# Let's apply this to the cluster!
 # TODO: This step fails if the pkg-repo image is on kind. Just move this one to gcr and all is good
-kapp deploy -a $PROFILE-pkg-repo- -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
+kapp deploy -a $PROFILE-pkg-repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
 
 #_ECHO_# We can now list all of the available Packages in the PackageRepository
 # kubectl get packagerepository
@@ -154,17 +154,19 @@ kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gi
 
 # DEMO - Upgrade Package version
 
+kubectl get packagerepository
+kubectl get packages
+kubectl get packageinstalls
 
-
-#This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
-tanzu package available list
-tanzu package installed list
-tanzu package installed delete lg-hello-app.corp.com -y
-tanzu package installed delete lg-gaint-app.corp.com -y
-kapp delete -a repo -y
-kapp delete -a lg-ny-pkg-gitops -y
-kapp delete -a lg-hello-app   -y
-kapp delete -a lg-giant-app   -y
-
-tanzu package available get lg-hello-app.corp.com/1.0.0 --values-schema
-kubectl get package lg-hello-app.corp.com.1.0.0 -o yaml
+##This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
+#tanzu package available list
+#tanzu package installed list
+#tanzu package installed delete lg-hello-app.corp.com -y
+#tanzu package installed delete lg-gaint-app.corp.com -y
+#kapp delete -a repo -y
+#kapp delete -a lg-ny-pkg-gitops -y
+#kapp delete -a lg-hello-app   -y
+#kapp delete -a lg-giant-app   -y
+#
+#tanzu package available get lg-hello-app.corp.com/1.0.0 --values-schema
+#kubectl get package lg-hello-app.corp.com.1.0.0 -o yaml
