@@ -19,7 +19,7 @@ else
   export DEPLOYMENT=${3:-ny}
   export VERSION=${4:-1.0.0}
   export REPO_VERSION=${5:-0.0.1}
-  export MY_REG=${6:-localhost:5001/gitopscon}
+  export MY_REG=${6:-gcr.io/pa-mbrodi/gitopscon}
 
   echo "-----> PLEASE REVIEW THE FOLLOWING VALUES:"
   echo "APP_NAME=$APP_NAME"
