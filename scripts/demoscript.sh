@@ -23,7 +23,8 @@ source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${PROFILE:=lg
 echo "Cloning source code"
 mkdir -p $TEMP/src/$APP_NAME && rm -rf $TEMP/src/$APP_NAME && git clone $APP_REPO $TEMP/src/$APP_NAME
 #sed -i '' "s|localhost:5001/gitopscon|$MY_REG|g" $APP_HOME/$APP_NAME/kbld.yml
-myReg=$MY_REG yq '.destinations[0].newImage = env(myReg)' $APP_HOME/$APP_NAME/kbld.yml
+myReg=$MY_REG yq e -i '.destinations[0].newImage = env(myReg)' $APP_HOME/$APP_NAME/kbld.yml
+
 clear
 #_ECHO_ON
 #_ECHO_# Let's package an app for distribution & deployment using Project Carvel!
