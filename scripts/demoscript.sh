@@ -67,7 +67,7 @@ imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION -o $TEMP/app-bundles/$PROFILE/$APP_
 
 #_ECHO_# One nifty thing in this bundle is the app's values schema file. We can use it to understand all configurable values:
 ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle/config/schema.yaml --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
-yq $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
+head -n 30 $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml | yq
 
 #_ECHO_# At this point, we could use Carvel ytt to render a deployable version of the YAML
 #_ECHO_# But we want Kubernetes to do this declaratively, not imperatively! Carvel has some K8s CRDs that can do this!
