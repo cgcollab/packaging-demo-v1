@@ -37,6 +37,8 @@ if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then vendir sync --chdir $APP_HOME/$AP
 
 #_ECHO_# Finally, we need the k8s config values and overlays for this specific profile
 tree $PROFILE_HOME/$PROFILE/$APP_NAME
+yq $PROFILE_HOME/$PROFILE/$APP_NAME/overlay/app.yml
+#yq $PROFILE_HOME/$PROFILE/$APP_NAME/values/values.yml
 
 #_ECHO_# That's a lot of YAML! Carvel kbld can tell us all the images referenced...
 kbld inspect -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --column image
