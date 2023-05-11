@@ -32,7 +32,7 @@ clear
 tree $TEMP/src/$APP_NAME $APP_HOME/$APP_NAME
 
 #_ECHO_# Next, we need the k8s config for 3rd party dependencies. Carvel vendir can help us get it!
-if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then cat $APP_HOME/$APP_NAME/vendir.yml; fi
+if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then yq $APP_HOME/$APP_NAME/vendir.yml; fi
 if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then vendir sync --chdir $APP_HOME/$APP_NAME; tree $APP_HOME/$APP_NAME; fi
 
 #_ECHO_# Finally, we need the k8s config values and overlays for this specific profile
@@ -47,13 +47,13 @@ kbld inspect -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --c
 #_ECHO_OFF
 # To instruct kbld to re-build the app from source code, remove the app resolution details from images.yaml or delete images.yml
 if [[ -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml ]]; then unset BUILD_FLAG; else export BUILD_FLAG="-f apps/hello-app/kbld.yml"; fi;
-#cat $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
-#cat $APP_HOME/$APP_NAME/kbld.yml
+#yq $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
+#yq $APP_HOME/$APP_NAME/kbld.yml
 #_ECHO_ON
 kbld $BUILD_FLAG -f $APP_HOME/$APP_NAME/base/config -f $PROFILE_HOME/$PROFILE/$APP_NAME --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml > /dev/null
 
 #_ECHO_# We now have a Bill of Materials that we can use to lock down these SHAs for our images!
-cat $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
+yq $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 
 clear
 #_ECHO_# Let's bundle all of the config PLUS the new Bill of Materials file...
@@ -74,13 +74,13 @@ yq $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
 #_ECHO_OFF
 ytt -f $PKG_REPO_HOME/templates/metadata-template.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 #_ECHO_ON
-cat $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+yq $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 
 #_ECHO_# For each release of the app bundle, we'll also need a Package CRD
 #_ECHO_OFF
 ytt -f $PKG_REPO_HOME/templates/package-template.yml --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml -v version="$VERSION" -v packageName="$PACKAGE_NAME" -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 #_ECHO_ON
-cat $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+yq $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 
 clear
 #_ECHO_# Most likely you have many apps, so you'll have many Packages, and you'll need to send all of them to many target locations.
@@ -107,7 +107,7 @@ clear
 #       Ex. What if repo template has version 5 and pkg repo 5.0 is upgraded to 5.1?
 ytt -f $DEPLOYMENT_HOME/templates/pkg-repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 #_ECHO_ON
-cat $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
+yq $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
 
 #_ECHO_# Let's apply this to the cluster!
 # TODO: This step fails if the pkg-repo image is on kind. Just move this one to gcr and all is good
@@ -125,7 +125,7 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
 # Write a command here to generate a PackageInstall file
 # This file would eventually need to be committed to git when you decide to automate this with an App
 #_ECHO_ON
-cat $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+yq $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 
 #_ECHO_# At this point, you could imperatively apply the PackageInstall and Secret to K8s, but... we'd rather automate this!
 # e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
@@ -142,7 +142,7 @@ open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tr
 #_ECHO_OFF
 ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
-cat $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
+yq $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 
 # TODO: Try also with kapp
 kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
@@ -162,7 +162,7 @@ kubectl get packageinstalls
 imgpkg copy -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION --to-repo $EDGE_REG/$PACKAGE_REPO_NAME
 imgpkg pull -b $EDGE_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -o $TEMP/airgapped
 tree -a $TEMP/airgapped
-cat $TEMP/airgapped/.imgpkg/images.yml
+yq $TEMP/airgapped/.imgpkg/images.yml
 
 ##This PackageRepository CR will allow kapp-controller to install any of the packages found within the repo
 #tanzu package available list
