@@ -120,7 +120,7 @@ kapp deploy -a $PROFILE-pkg-repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION
 # kubectl get packagerepository
 # kubectl get packagemetadatas
 kubectl get packages
-kubectl get package $PACKAGE_NAME.$VERSION  -o yaml
+kubectl get package $PACKAGE_NAME.$VERSION  -o yaml |yq
 
 #_ECHO_# To install the Package and to specify any final configuration values, we need a PackageInstall and Secret
 #_ECHO_OFF
@@ -161,7 +161,7 @@ kubectl get packagerepository
 kubectl get packages
 kubectl get packageinstalls
 
-#_ECHO_# What if the target location is gir-gapped? imgpck can help!
+#_ECHO_# What if the target location is gir-gapped? imgpkg can help!
 imgpkg copy -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION --to-repo $EDGE_REG/$PACKAGE_REPO_NAME
 imgpkg pull -b $EDGE_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -o $TEMP/airgapped
 tree -a $TEMP/airgapped
