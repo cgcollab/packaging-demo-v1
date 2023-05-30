@@ -35,7 +35,7 @@ else
   echo "-----> LOOK OK? ENTER ANY KEY TO CONTINUE."
   read -p "-----> OTHERWISE QUIT NOW AND CHECK USAGE INSTRUCTIONS: $0 --help" CONTINUE
 
-  export APP_REPO=git@github.com:GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
+  export APP_REPO=https://github.com/GitOpsCon2023-gitops-edge-configuration/$APP_NAME.git
 
   export TEMP=$HOME_DIR/temp
   export APP_HOME=$HOME_DIR/apps
