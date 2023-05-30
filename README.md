@@ -13,11 +13,12 @@ The task grows exponentially harder and it becomes critical to approach it metho
 
 In this talk, we’ll dive into the challenges that complicate application configuration management and deployment at the edge.
 We’ll also propose an approach for mitigating these challenges using Carvel, a suite of composable tools that can be leveraged for application building, configuration, and deployment to Kubernetes.
+
 ----
 
 #### How to Use this Repo
 
-1. Review the [prerequisites](scripts/prerequisites.sh). You can execute the script to satisfy some prerequisites.
+1. Review the [prerequisites](scripts/prerequisites.sh) (the list is in the commnet at the top of the file). You can execute the script to satisfy some prerequisites.
 2. In a terminal window, go to the home directory of this repo
 3Execute the demo:
 ```shell
