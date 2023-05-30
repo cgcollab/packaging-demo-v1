@@ -18,7 +18,7 @@ We’ll also propose an approach for mitigating these challenges using Carvel, a
 
 #### How to Use this Repo
 
-1. Review the [prerequisites](scripts/prerequisites.sh) (the list is in the commnet at the top of the file). You can execute the script to satisfy some prerequisites.
+1. Review the [prerequisites](scripts/prerequisites.sh) (the list is in the comment at the top of the file). You can execute the script to satisfy some prerequisites.
 2. In a terminal window, go to the home directory of this repo
 3Execute the demo:
 ```shell
