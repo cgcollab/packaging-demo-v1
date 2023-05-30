@@ -20,7 +20,7 @@ We’ll also propose an approach for mitigating these challenges using Carvel, a
 
 1. Review the [prerequisites](scripts/prerequisites.sh) (the list is in the comment at the top of the file). You can execute the script to satisfy some prerequisites.
 2. In a terminal window, go to the home directory of this repo
-3Execute the demo:
+3. Execute the demo:
 ```shell
 ./scripts/demorunner.sh scripts/demoscript.sh
 ```
