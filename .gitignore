@@ -1,3 +1,4 @@
+.vscode/
 .idea
 **/.DS_Store
 #scripts/demorunner.sh
