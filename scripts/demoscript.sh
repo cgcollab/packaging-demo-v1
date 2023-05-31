@@ -49,7 +49,7 @@ kbld inspect -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --c
 #_ECHO_# Looks like we still need to build our app into an image and replace all tags with SHAs. kbld can help here too!
 #_ECHO_OFF
 # To instruct kbld to re-build the app from source code, remove the app resolution details from images.yaml or delete images.yml
-if [[ -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml ]]; then unset BUILD_FLAG; else export BUILD_FLAG="-f apps/hello-app/kbld.yml"; fi;
+if [[ -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml ]]; then unset BUILD_FLAG; else export BUILD_FLAG="-f $APP_HOME/$APP_NAME/kbld.yml"; fi;
 #yq $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 #yq $APP_HOME/$APP_NAME/kbld.yml
 #_ECHO_ON
@@ -161,7 +161,7 @@ kubectl get packagerepository
 kubectl get packages
 kubectl get packageinstalls
 
-#_ECHO_# What if the target location is gir-gapped? imgpkg can help!
+#_ECHO_# What if the target location is air-gapped? imgpkg can help!
 imgpkg copy -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION --to-repo $EDGE_REG/$PACKAGE_REPO_NAME
 imgpkg pull -b $EDGE_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -o $TEMP/airgapped
 tree -a $TEMP/airgapped
