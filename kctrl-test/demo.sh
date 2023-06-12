@@ -1,8 +1,9 @@
 #_ECHO_OFF
 export DEMO_DELAY=0
-source kctrl-test/.envrc
+source kctrl-test/set-env.sh
 clear
 #_ECHO_ON
+#_ECHO_# Based on demo: https://asciinema.org/a/515349
 env | grep "KCTRL_"
 
 rm -rf $KCTRL_DEMO_TEMP
