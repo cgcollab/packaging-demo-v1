@@ -1,6 +1,6 @@
 #!/bin/zsh
 export APP_NAME=giant-app
-export PROFILE=lg
+export CLASSES=lg
 export DEPLOYMENT=ny
 export VERSION=3.5.1
 export REPO_VERSION=0.0.1

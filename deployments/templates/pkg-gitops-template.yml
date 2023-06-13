@@ -3,7 +3,7 @@
 apiVersion: kappctrl.k14s.io/v1alpha1
 kind: App
 metadata:
-  name: #@ data.values.profile + "-" + data.values.deployment + "-pkg-gitops"
+  name: #@ data.values.classes + "-" + data.values.deployment + "-pkg-gitops"
   namespace: default
 #!  annotations:
 #!    kapp.k14s.io/change-rule.create-order: "upsert after upserting rbac"
@@ -14,7 +14,7 @@ spec:
     - git:
         url: https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config
         ref: origin/main
-        subPath: #@ "deployments/" + data.values.profile + "/pkg-installer/" + data.values.packageRepoVersion + "/" + data.values.deployment
+        subPath: #@ "deployments/" + data.values.classes + "/pkg-installer/" + data.values.packageRepoVersion + "/" + data.values.deployment
   template:
     - ytt: {}
 

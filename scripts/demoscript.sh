@@ -14,9 +14,9 @@ DEMO_HOME=$( pwd )
 
 echo
 echo "Setting env vars"
-# unset APP_NAME VERSION PROFILE DEPLOYMENT REPO_VERSION MY_REG
+# unset APP_NAME VERSION CLASSES DEPLOYMENT REPO_VERSION MY_REG
 # To override, export env vars with desired values and re-run demo script
-source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${PROFILE:=lg}" "${DEPLOYMENT:=ny}" "${VERSION:=1.0.0}" "${REPO_VERSION:=0.0.1}" "${MY_REG:=localhost:5001/gitopscon}"
+source $DEMO_HOME/scripts/set-app-env.sh "${APP_NAME:=hello-app}" "${CLASSES:=lg}" "${DEPLOYMENT:=ny}" "${VERSION:=1.0.0}" "${REPO_VERSION:=0.0.1}" "${MY_REG:=localhost:5001/gitopscon}"
 
 # TO-DO: Update registry and REPO_VERSION in files. Do this in set env actually
 
@@ -36,13 +36,13 @@ tree $TEMP/src/$APP_NAME $APP_HOME/$APP_NAME
 if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then yq $APP_HOME/$APP_NAME/vendir.yml; fi
 if [ -f $APP_HOME/$APP_NAME/vendir.yml ]; then vendir sync --chdir $APP_HOME/$APP_NAME; tree $APP_HOME/$APP_NAME; fi
 
-#_ECHO_# Finally, we need the k8s config values and overlays for this specific profile
-tree $PROFILE_HOME/$PROFILE/$APP_NAME
-yq $PROFILE_HOME/$PROFILE/$APP_NAME/overlay/app.yml
-#yq $PROFILE_HOME/$PROFILE/$APP_NAME/values/values.yml
+#_ECHO_# Finally, we need the k8s config values and overlays for this specific classes
+tree $CLASSES_HOME/$CLASSES/$APP_NAME
+yq $CLASSES_HOME/$CLASSES/$APP_NAME/overlay/app.yml
+#yq $CLASSES_HOME/$CLASSES/$APP_NAME/values/values.yml
 
 #_ECHO_# That's a lot of YAML! Carvel kbld can tell us all the images referenced...
-kbld inspect -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --column image
+kbld inspect -f $APP_HOME/$APP_NAME/base -f $CLASSES_HOME/$CLASSES/$APP_NAME --column image
 
 # TO-DO: What is kbld flag --unresolved-inspect
 
@@ -53,47 +53,47 @@ if [[ -f $APP_HOME/$APP_NAME/base/.imgpkg/images.yml ]]; then unset BUILD_FLAG; 
 #yq $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 #yq $APP_HOME/$APP_NAME/kbld.yml
 #_ECHO_ON
-kbld $BUILD_FLAG -f $APP_HOME/$APP_NAME/base/config -f $PROFILE_HOME/$PROFILE/$APP_NAME --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml > /dev/null
+kbld $BUILD_FLAG -f $APP_HOME/$APP_NAME/base/config -f $CLASSES_HOME/$CLASSES/$APP_NAME --imgpkg-lock-output $APP_HOME/$APP_NAME/base/.imgpkg/images.yml > /dev/null
 
 #_ECHO_# We now have a Bill of Materials that we can use to lock down these SHAs for our images!
 yq $APP_HOME/$APP_NAME/base/.imgpkg/images.yml
 
 clear
 #_ECHO_# Let's bundle all of the config PLUS the new Bill of Materials file...
-imgpkg push -b $MY_REG/$BUNDLE_NAME:$VERSION -f $APP_HOME/$APP_NAME/base -f $PROFILE_HOME/$PROFILE/$APP_NAME --lock-output $APP_HOME/$APP_NAME/$PROFILE-bundle.$VERSION.lock.yml
+imgpkg push -b $MY_REG/$BUNDLE_NAME:$VERSION -f $APP_HOME/$APP_NAME/base -f $CLASSES_HOME/$CLASSES/$APP_NAME --lock-output $APP_HOME/$APP_NAME/$CLASSES-bundle.$VERSION.lock.yml
 skopeo list-tags docker://$MY_REG/$BUNDLE_NAME #OR: curl localhost:5001/v2/gitopscon/$BUNDLE_NAME/tags/list |jq
 
 #_ECHO_# What exactly is in the bundle we created? Let's take a look... imgpkg makes it easy to move or share our app bundle
-imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION -o $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle; tree -a $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle
+imgpkg pull -b $MY_REG/$BUNDLE_NAME:$VERSION -o $TEMP/app-bundles/$CLASSES/$APP_NAME/$VERSION/bundle; tree -a $TEMP/app-bundles/$CLASSES/$APP_NAME/$VERSION/bundle
 
 #_ECHO_# One nifty thing in this bundle is the app's values schema file. We can use it to understand all configurable values:
-ytt -f $TEMP/app-bundles/$PROFILE/$APP_NAME/$VERSION/bundle/config/schema.yaml --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml
-head -n 30 $TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml | yq
+ytt -f $TEMP/app-bundles/$CLASSES/$APP_NAME/$VERSION/bundle/config/schema.yaml --data-values-schema-inspect -o openapi-v3 > $TEMP/app-bundles/$CLASSES/$APP_NAME/schema-openapi.yml
+head -n 30 $TEMP/app-bundles/$CLASSES/$APP_NAME/schema-openapi.yml | yq
 
 #_ECHO_# At this point, we could use Carvel ytt to render a deployable version of the YAML
 #_ECHO_# But we want Kubernetes to do this declaratively, not imperatively! Carvel has some K8s CRDs that can do this!
-# TO-DO: Consider: maybe this should be the first profile-specific artifact? One app, one package per profile?
+# TO-DO: Consider: maybe this should be the first classes-specific artifact? One app, one package per classes?
 #_ECHO_# Let's start with PackageMetadata, a way to provide some metadata to Kubernetes
 #_ECHO_OFF
-ytt -f $PKG_REPO_HOME/templates/metadata-template.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+ytt -f $PKG_REPO_HOME/templates/metadata-template.yml -v packageName="$PACKAGE_NAME" -v appName="$APP_NAME" > $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 #_ECHO_ON
-yq $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
+yq $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/packages/$PACKAGE_NAME/metadata.yml
 
 #_ECHO_# For each release of the app bundle, we'll also need a Package CRD
 #_ECHO_OFF
-ytt -f $PKG_REPO_HOME/templates/package-template.yml --data-value-file openapi=$TEMP/app-bundles/$PROFILE/$APP_NAME/schema-openapi.yml -v version="$VERSION" -v packageName="$PACKAGE_NAME" -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" > $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+ytt -f $PKG_REPO_HOME/templates/package-template.yml --data-value-file openapi=$TEMP/app-bundles/$CLASSES/$APP_NAME/schema-openapi.yml -v version="$VERSION" -v packageName="$PACKAGE_NAME" -v bundleName="$BUNDLE_NAME" -v registry="$MY_REG" > $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 #_ECHO_ON
-yq $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
+yq $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/packages/$PACKAGE_NAME/$VERSION.yml
 
 clear
 #_ECHO_# Most likely you have many apps, so you'll have many Packages, and you'll need to send all of them to many target locations.
-tree $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/
+tree $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/packages/
 #_ECHO_# How can you bundle and distribute these easily for deployment at many target locations? Remember our friend imgpkg?
-kbld -f $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/ --imgpkg-lock-output $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/images.yml > /dev/null
+kbld -f $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/ --imgpkg-lock-output $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/.imgpkg/images.yml > /dev/null
 
-# TODO: This file should also be in git, along with the corrresponding packageinstaller and location values config: $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/images.yml
+# TODO: This file should also be in git, along with the corrresponding packageinstaller and location values config: $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/.imgpkg/images.yml
 
-imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -f $PKG_REPO_HOME/$PROFILE/$REPO_VERSION
+imgpkg push -b $MY_REG/$PACKAGE_REPO_NAME:$REPO_VERSION -f $PKG_REPO_HOME/$CLASSES/$REPO_VERSION
 skopeo list-tags docker://$MY_REG/$PACKAGE_REPO_NAME  #OR curl localhost:5001/v2/gitopscon/$PACKAGE_REPO_NAME/tags/list |jq
 #curl -X GET http://localhost:5001/v2/_catalog | jq
 
@@ -108,13 +108,13 @@ clear
 #       Consider putting that in git with a corresponding App CRD to automate PkgRepo updates
 #       This about how to use kbld to control updates in this scenario
 #       Ex. What if repo template has version 5 and pkg repo 5.0 is upgraded to 5.1?
-ytt -f $DEPLOYMENT_HOME/templates/pkg-repo-template.yml -v registry="$MY_REG" -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
+ytt -f $DEPLOYMENT_HOME/templates/pkg-repo-template.yml -v registry="$MY_REG" -v classes="$CLASSES" -v packageRepoVersion="$REPO_VERSION" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$CLASSES/.imgpkg/images.yml > $DEPLOYMENT_HOME/$CLASSES/repo.$REPO_VERSION.yml
 #_ECHO_ON
-yq $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml
+yq $DEPLOYMENT_HOME/$CLASSES/repo.$REPO_VERSION.yml
 
 #_ECHO_# Let's apply this to the cluster!
 # TODO: This step fails if the pkg-repo image is on kind. Just move this one to gcr and all is good
-kapp deploy -a $PROFILE-pkg-repo -f $DEPLOYMENT_HOME/$PROFILE/repo.$REPO_VERSION.yml -y
+kapp deploy -a $CLASSES-pkg-repo -f $DEPLOYMENT_HOME/$CLASSES/repo.$REPO_VERSION.yml -y
 
 #_ECHO_# We can now list all of the available Packages in the PackageRepository
 # kubectl get packagerepository
@@ -128,27 +128,27 @@ kubectl get package $PACKAGE_NAME.$VERSION  -o yaml |yq
 # Write a command here to generate a PackageInstall file
 # This file would eventually need to be committed to git when you decide to automate this with an App
 #_ECHO_ON
-yq $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+yq $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 
 #_ECHO_# At this point, you could imperatively apply the PackageInstall and Secret to K8s, but... we'd rather automate this!
-# e.g. kapp deploy -a $PROFILE-$APP_NAME -f $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
+# e.g. kapp deploy -a $CLASSES-$APP_NAME -f $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$DEPLOYMENT/$APP_NAME.yml -y
 
 #_ECHO_# Of course, our PackageInstall and Secret would need to be available in a git repo...
-open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+open https://github.com/GitOpsCon2023-gitops-edge-configuration/gitops-config/tree/main/$DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 # If you created a new app or a new version, git push the following files:
-#git add $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
-#git add $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+#git add $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
+#git add $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/$DEPLOYMENT/$APP_NAME.yml
 #git commit -m "update"
 #git push
 
 #_ECHO_# And we can use Carvel kapp-controller to watch for changes in these files and automatically update the cluster
 #_ECHO_OFF
-ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v profile="$PROFILE" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
+ytt -f $DEPLOYMENT_HOME/templates/pkg-gitops-template.yml -v classes="$CLASSES" -v packageRepoVersion="$REPO_VERSION" -v deployment="$DEPLOYMENT" | kbld -f- --imgpkg-lock-output $DEPLOYMENT_HOME/$CLASSES/gitops-controller/.imgpkg/images.yml > $DEPLOYMENT_HOME/$CLASSES/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 #_ECHO_ON
-yq $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
+yq $DEPLOYMENT_HOME/$CLASSES/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 
 # TODO: Try also with kapp
-kubectl apply  -f $DEPLOYMENT_HOME/$PROFILE/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
+kubectl apply  -f $DEPLOYMENT_HOME/$CLASSES/gitops-controller/$DEPLOYMENT/pkg-gitops.$REPO_VERSION.yml
 
 #_ECHO_# Now every time a location wants to upgrade a package or change local vales, they just need to make a git commit!
 

@@ -10,12 +10,12 @@ if [[ $1 == "--help" ]] || [[ $1 == "-h" ]] || [[ $1 == "help" ]]; then
     echo
     echo "USAGE EXAMPLES:"
     echo "To accept all default values, run:      $0"
-    echo "To override initial arg defaults, run:  $0 <app-name> <profile-name> <deployment-name>"
-    echo "To override all default values, run:    $0 <app-name> <profile-name> <deployment-name> <app-version> <repo-version> <registry>"
+    echo "To override initial arg defaults, run:  $0 <app-name> <classes-name> <deployment-name>"
+    echo "To override all default values, run:    $0 <app-name> <classes-name> <deployment-name> <app-version> <repo-version> <registry>"
     echo
 else
   export APP_NAME=${1:-hello-app}
-  export PROFILE=${2:-lg}
+  export CLASSES=${2:-lg}
   export DEPLOYMENT=${3:-ny}
   export VERSION=${4:-1.0.0}
   export REPO_VERSION=${5:-0.0.1}
@@ -24,7 +24,7 @@ else
 
   echo "-----> PLEASE REVIEW THE FOLLOWING VALUES:"
   echo "APP_NAME=$APP_NAME"
-  echo "PROFILE=$PROFILE"
+  echo "CLASSES=$CLASSES"
   echo "DEPLOYMENT=$DEPLOYMENT"
   echo "VERSION=$VERSION"
   echo "REPO_VERSION=$REPO_VERSION"
@@ -39,26 +39,26 @@ else
 
   export TEMP=$HOME_DIR/temp
   export APP_HOME=$HOME_DIR/apps
-  export PROFILE_HOME=$HOME_DIR/profiles
+  export CLASSES_HOME=$HOME_DIR/classes
   export DEPLOYMENT_HOME=$HOME_DIR/deployments
   export PKG_REPO_HOME=$HOME_DIR/pkg-repos
 
-  export BUNDLE_NAME=$PROFILE-$APP_NAME-bundle
-  export PACKAGE_NAME=$PROFILE-$APP_NAME.corp.com
-  export PACKAGE_REPO_NAME=$PROFILE-pkg-repo
+  export BUNDLE_NAME=$CLASSES-$APP_NAME-bundle
+  export PACKAGE_NAME=$CLASSES-$APP_NAME.corp.com
+  export PACKAGE_REPO_NAME=$CLASSES-pkg-repo
 
   mkdir -p $APP_HOME/$APP_NAME/base/.imgpkg
   touch $APP_HOME/$APP_NAME/base/.imgpkg/.gitkeep
-  mkdir -p $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME
-  touch $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/packages/$PACKAGE_NAME/.gitkeep
-  mkdir -p $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg
-  touch $PKG_REPO_HOME/$PROFILE/$REPO_VERSION/.imgpkg/.gitkeep
-  mkdir -p $DEPLOYMENT_HOME/$PROFILE/.imgpkg/
-  touch $DEPLOYMENT_HOME/$PROFILE/.imgpkg/.gitkeep
-  mkdir $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg
-  touch $DEPLOYMENT_HOME/$PROFILE/gitops-controller/.imgpkg/.gitkeep
-#  mkdir -p $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/.imgpkg
-#  touch $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/.imgpkg/.gitkeep
-#  mkdir -p $DEPLOYMENT_HOME/$PROFILE/pkg-installer/$REPO_VERSION/$DEPLOYMENT
+  mkdir -p $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/$PACKAGE_NAME
+  touch $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/$PACKAGE_NAME/.gitkeep
+  mkdir -p $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/.imgpkg
+  touch $PKG_REPO_HOME/$CLASSES/$REPO_VERSION/.imgpkg/.gitkeep
+  mkdir -p $DEPLOYMENT_HOME/$CLASSES/.imgpkg/
+  touch $DEPLOYMENT_HOME/$CLASSES/.imgpkg/.gitkeep
+  mkdir $DEPLOYMENT_HOME/$CLASSES/gitops-controller/.imgpkg
+  touch $DEPLOYMENT_HOME/$CLASSES/gitops-controller/.imgpkg/.gitkeep
+#  mkdir -p $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/.imgpkg
+#  touch $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/.imgpkg/.gitkeep
+#  mkdir -p $DEPLOYMENT_HOME/$CLASSES/pkg-installer/$REPO_VERSION/$DEPLOYMENT
 fi
 

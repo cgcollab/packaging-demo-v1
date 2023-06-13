@@ -3,8 +3,8 @@
 apiVersion: packaging.carvel.dev/v1alpha1
 kind: PackageRepository
 metadata:
-  name: #@ data.values.profile + "-pkg-repo"
+  name: #@ data.values.classes + "-pkg-repo"
 spec:
   fetch:
     imgpkgBundle:
-      image: #@ data.values.registry + "/" + data.values.profile + "-pkg-repo:" + data.values.packageRepoVersion
+      image: #@ data.values.registry + "/" + data.values.classes + "-pkg-repo:" + data.values.packageRepoVersion
