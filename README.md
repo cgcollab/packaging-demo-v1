@@ -1,6 +1,6 @@
 # gitops-config
 
-This repository serves to exemplify the ideas presented at GitOpsCon 2023.
+This repository serves to exemplify the ideas [presented at GitOpsCon 2023](https://www.youtube.com/watch?v=v3dNnipU2sI).
 > NB: this repo has been superseded by [packaging-demo](https://github.com/cgcollab/packaging-demo)
 
 ----
